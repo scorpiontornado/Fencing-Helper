@@ -35,14 +35,11 @@ class Fencer:
     + String: name
   '''
 
-  def __init__(self, name, old_highest_id):
-    ''' Initiate variables, incl. generating a unique fencer id '''
-    new_highest_id = old_highest_id + 1
-    self.fencer_id = "ID" + new_highest_id
+  def __init__(self, name, fencer_id):
+    ''' Initiate variables '''
+    self.fencer_id = fencer_id
     
     self.name = name
-
-    return new_highest_id # TODO: decide whether to increment here or outside
 
   def __str__(self):
     ''' Return the fencer's name when __str__, print(), or str() are called on the object'''
@@ -60,13 +57,24 @@ class Event:
   Methods:
     Fencer: get_fencer_by_id(fencer_id)
   '''
+    
   def __init__(self, event_data, rankings_file):
     self.event_data = event_data # including keys ("school_years" or "age_bracket"), "weapon", and "type" (individual or group)
 
     # Read in the rankings of just the fencers' names (not their IDs) inputted by a coach into a file
-    self.name_rankings = []
+    self.fencers = []
+    self.highest_id = 0 # Keeps track of the highest integer currently in use in a fencer id. First fencer will have an id of "ID001" # TODO: decide whether to pad with 0s or not # sure, makes it easier to read
     with open(rankings_file) as f:
       for name in f:
-        self.name_rankings.append(name.strip()) # Append the current name to name_rankings, stripped of newline characters
+        self.highest_id = self.highest_id + 1 # Increment highest_id by 1
+
+        self.fencers.append(Fencer(name.strip(), self.generate_id())) # Append the current name to name_rankings, stripped of newline characters
 
     # self.rounds = [Round(self.rankings)] # Initialise the rounds with a round with hardcoded rankings (determined by one of the coaches)
+
+  def generate_id(self):
+      # Number of 0s to pad with
+      padding = 3 - len(str(self.highest_id))
+      if padding < 0: padding = 0 # padding is 0 minimum, if the number of digits is 3 or more. E.g. "ID2063"
+    
+      return "ID" + "0"*padding + str(self.highest_id)
