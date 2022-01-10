@@ -60,8 +60,13 @@ class Event:
   Methods:
     Fencer: get_fencer_by_id(fencer_id)
   '''
-  def __init__(self, event_data, rankings):
+  def __init__(self, event_data, rankings_file):
     self.event_data = event_data # including keys ("school_years" or "age_bracket"), "weapon", and "type" (individual or group)
 
-    self.rankings = rankings
-    self.rounds = [Round(self.rankings)] # Initialise the rounds with a round with hardcoded rankings (determined by one of the coaches)
+    # Read in the rankings of just the fencers' names (not their IDs) inputted by a coach into a file
+    self.name_rankings = []
+    with open(rankings_file) as f:
+      for name in f:
+        self.name_rankings.append(name.strip()) # Append the current name to name_rankings, stripped of newline characters
+
+    # self.rounds = [Round(self.rankings)] # Initialise the rounds with a round with hardcoded rankings (determined by one of the coaches)
