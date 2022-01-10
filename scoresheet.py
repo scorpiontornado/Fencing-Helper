@@ -73,8 +73,9 @@ class Event:
     # self.rounds = [Round(self.rankings)] # Initialise the rounds with a round with hardcoded rankings (determined by one of the coaches)
 
   def generate_id(self):
-      # Number of 0s to pad with
-      padding = 3 - len(str(self.highest_id))
-      if padding < 0: padding = 0 # padding is 0 minimum, if the number of digits is 3 or more. E.g. "ID2063"
-    
-      return "ID" + "0"*padding + str(self.highest_id)
+    ''' Generates a unique fencer_id, padded with zeros '''
+    # Number of 0s to pad with
+    padding = 3 - len(str(self.highest_id))
+    if padding < 0: padding = 0 # padding is 0 minimum, if the number of digits is 3 or more. E.g. "ID2063"
+  
+    return "ID" + "0"*padding + str(self.highest_id)
