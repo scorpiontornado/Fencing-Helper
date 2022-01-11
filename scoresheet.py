@@ -77,6 +77,7 @@ class Event:
       
     ### Initialise self.id_rankings (as self.fencers is already ordered by rank initially)
     self.id_rankings = [fencer.fencer_id for fencer in self.fencers]
+    self.rounds = []
 
   def generate_id(self):
     ''' Generates a unique fencer_id, padded with zeros '''
