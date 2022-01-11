@@ -6,3 +6,4 @@ https://stackoverflow.com/questions/30569408/best-practices-on-setting-exit-stat
   Error codes: 0 iff success. Negative numbers: errors. Positive numbers: warnings.
 https://softwareengineering.stackexchange.com/questions/209693/best-practices-to-create-error-codes-pattern-for-an-enterprise-project
   Exceptions are the modern way to report errors (rather than error return values)
+https://stackoverflow.com/questions/16796709/align-columns-in-a-text-file

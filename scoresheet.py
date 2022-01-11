@@ -42,8 +42,8 @@ class Fencer:
     self.name = name
 
   def __str__(self):
-    ''' Return the fencer's name when __str__, print(), or str() are called on the object'''
-    return self.name
+    ''' Returns fencer's name and id (justified into columns for readability) when __str__, print(), or str() are called on the object'''
+    return '{0.name:<24} {0.fencer_id:<10}'.format(self) # left-justify name and right-justify fencer_id
     
 class Event:
   '''
