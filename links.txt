@@ -2,8 +2,18 @@ Reference links for myself
 
 https://codingsight.com/git-branching-naming-convention-best-practices/
 https://stackoverflow.com/questions/9786355/python-object-hierarchy-referencing-an-owner-instance
+
 https://stackoverflow.com/questions/30569408/best-practices-on-setting-exit-status-codes
   Error codes: 0 iff success. Negative numbers: errors. Positive numbers: warnings.
 https://softwareengineering.stackexchange.com/questions/209693/best-practices-to-create-error-codes-pattern-for-an-enterprise-project
   Exceptions are the modern way to report errors (rather than error return values)
+
 https://stackoverflow.com/questions/16796709/align-columns-in-a-text-file
+
+Licenses:
+  https://opensource.guide/legal/#which-open-source-license-is-appropriate-for-my-project
+  https://choosealicense.com/
+
+https://note.nkmk.me/en/python-check-int-float/
+
+https://stackoverflow.com/questions/9539921/how-do-i-create-a-python-function-with-optional-arguments
