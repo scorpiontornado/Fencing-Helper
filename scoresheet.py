@@ -27,8 +27,10 @@ class Round:
     + generate_rankings() (Ranks fencers in desc. order based on data from parse_data)
   '''
   # TODO: Should fencers be here or in year? Should be easy enough to change, just pass in fencers to input. But, do I want changes to fencers here to affect fencers globally?
-  def __init__(self, metadata, prev_ranks):
+  def __init__(self, parent, metadata, prev_ranks):
     ''' Input: metadata (dict with key "date"), rankings (list of fencers, sorted in desc. order (i.e. best to worst), from the previous round) '''
+    self.parent = parent # Parent (Event) object
+    
     self.metadata = metadata # TODO: should the date key be a string YYYYMMDD, DDMMYYYY, or a datetime object?
     self.prev_ranks = prev_ranks
 
@@ -90,13 +92,15 @@ class Round:
     '''
     if isinstance(poule_num, str) and poule_num.lower() == "all": # isinstance is necessary as integers dont have a .lower() method
       for i, cur_poule in enumerate(self.poules):
-        print(f"\n====== Poule {i+1} ======")
+        print(f"\n ========= Poule {i+1} =========")
         for fencer_id in cur_poule:
-          print(f"{fencer_id}")
+          fencer = self.parent.get_fencer_by_id(fencer_id)
+          print(fencer)
     elif isinstance(poule_num, int) and poule_num >= 0 and poule_num < self.num_poules:
-      print(f"\n====== Poule {poule_num} ======")
+      print(f"\n ========= Poule {poule_num} =========")
       for fencer_id in self.poules[poule_num-1]: # -1 because users will expect it to be 1-indexed rather than 0-indexed
-        print(f"{fencer_id}")
+        fencer = self.parent.get_fencer_by_id(fencer_id)
+        print(fencer)
     else:
       print("Invalid poule number")
   
@@ -164,7 +168,7 @@ class Event:
     id_rankings overrides the existing rankings from the previous round, e.g. if a fencer is sick for that round
     '''
     if id_rankings: self.id_rankings = id_rankings # override self.id_rankings if id_rankings is not empty
-    self.rounds.append(Round(metadata, self.id_rankings)) # create a new round
+    self.rounds.append(Round(self, metadata, self.id_rankings)) # create a new round
 
   def get_fencer_by_id(self, fencer_id):
     ''' Returns the fencer object associated with the given fencer_id '''
