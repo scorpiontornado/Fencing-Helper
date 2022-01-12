@@ -14,13 +14,15 @@ class Round:
   
   Attributes:
     + dict: metadata (contains dates the round occured over)
-    + fencer_id[]: prev_rankings (rankings from the previous round, sorted in desc. order, best to worst)
-    + fencer_id[]: new_rankings (rankings generated from this round, sorted in desc. order, best to worst)
+    + fencer_id[]: prev_ranks (rankings from the previous round, sorted in desc. order, best to worst)
+    + fencer_id[]: new_ranks (rankings generated from this round, sorted in desc. order, best to worst)
     + dict: fencer_data (contains wins (w), losses (l), hits gained (hg), hits received (hr), and indicator (ind; hg - hr) for each fencer)
+    + int: num_poules (ideally enough to ensure 6 or 7 fencers are in each poule)
     + Poule[]: poules
   
   Methods:
     + allocate_poules() (Allocates fencers into poules based on their rankings from the previous round)
+    + display_poule([poule_num]) (poule_num can be "all" (default) or any integer >= 0 and < self.num_poules)
     + parse_data() (Extracts and calculates data (w, l, hg, hr, ind) for each fencer)
     + generate_rankings() (Ranks fencers in desc. order based on data from parse_data)
   '''
@@ -29,7 +31,75 @@ class Round:
     ''' Input: metadata (dict with key "date"), rankings (list of fencers, sorted in desc. order (i.e. best to worst), from the previous round) '''
     self.metadata = metadata # TODO: should the date key be a string YYYYMMDD, DDMMYYYY, or a datetime object?
     self.prev_ranks = prev_ranks
+
+  def allocate_poules(self, num_poules=None):
+    '''
+    Allocate fencers to poules based on their rankings. Done in a manner that spreads out the top fencers as much as possible.
+  
+    For example, when inputted 12 fencers, it will place them in poules like so (where each sub-list is a poule, and each number is the fencer's rank):
+      [[1, 10, 11], [2, 9, 12], [3, 8], [4, 7], [5, 6]]
+
+    Input: [num_poules] (must be an int, > 0 and <= len(self.prev_ranks))
+    '''
+
+    # TODO: determine num_poules automatically, but have some sort of override
+    # Need to come up with an algorithm/expression to determine num_poules
+    # Ideally, you want there to be 6 or 7 fencers per poule in competition fencing
+
+    self.DEFAULT_NUM_POULES = 6
     
+    if (num_poules
+        and isinstance(num_poules, int)
+        and num_poules > 0
+        and num_poules <= len(self.prev_ranks)):
+          self.num_poules = num_poules
+    else:
+      self.num_poules = len(self.prev_ranks) // self.DEFAULT_NUM_POULES
+    
+    self.poules = [[] for _ in range(self.num_poules)] # Create empty poules
+    # print("\nEmpty self.poules:", self.poules)
+    # print("self.prev_ranks:", self.prev_ranks)
+  
+    index_from = 0
+    index_to = 0 # Poule index_to put the fencer in
+    direction = 1 # +1 for forwards, -1 for backwards. The number index_to is incremented by.
+  
+    while index_from < len(self.prev_ranks):
+      # 1. Assign fencer to poule
+      self.poules[index_to].append(self.prev_ranks[index_from])
+  
+      # 2. Increment index_from by 1
+      index_from += 1
+      
+      # 3. Increment index_to by direction
+      index_to += direction
+      
+      # 4. Check if index_to has gone over the boundaries, if so, reset to boundary and change direction
+      # (Checking > rather than >= 0 ensures it won't be true on the first pass through, when index_to is 0)
+      if index_to > self.num_poules - 1: # check uppper boundary
+        index_to = self.num_poules - 1 # reset to upper boundary
+        direction = -1 # go down
+      elif index_to < 0: # check lower boundary
+        index_to = 0 # reset to lower boundary
+        direction = 1 # go up
+
+  def display_poule(self, poule_num="all"):
+    '''
+    Displays the fencer ids in the given poule.
+    Input: poule_num (can be "all" (default) or any integer >= 0 and < self.num_poules)
+    '''
+    if poule_num.lower() == "all":
+      for i, cur_poule in enumerate(self.poules):
+        print(f"\n====== Poule {i+1} ======")
+        for fencer_id in cur_poule:
+          print(f"{fencer_id}")
+    elif isinstance(poule_num, int) and poule_num >= 0 and poule_num < self.num_poules:
+      print(f"\n====== Poule {poule_num} ======")
+      for fencer_id in self.poules[poule_num-1]: # -1 because users will expect it to be 1-indexed rather than 0-indexed
+        print(f"{fencer_id}")
+    else:
+      print("Invalid poule number")
+  
 class Fencer:
   '''
   A single fencer, containing data for the current round only

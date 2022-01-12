@@ -6,12 +6,13 @@ def allocate_poules(rankings, num_poules):
     [[1, 10, 11], [2, 9, 12], [3, 8], [4, 7], [5, 6]]
 
   Inputs: rankings (fencer_ids in desc. order), num_poules (the number of poules to allocate fencers into)
+
+  The number of poules should 
   '''
   # TODO: come up with an algorithm / expression to determine num_poules. Ideally, you want there to be 6 or 7 fencers per poule in competition fencing
   # for 3 poules,  0 1 2 2 1 0 0 1 2 2 1 0
   
   # Poules of 6 or 7 if possible for formal comps. 
-  #poules = [[]*num_poules]
   poules = [[] for _ in range(num_poules)] # Create empty poules
   print("Empty poules:", poules)
   print("Rankings:", rankings)
