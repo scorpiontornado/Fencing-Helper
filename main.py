@@ -13,4 +13,6 @@ for fencer in years["2022"][0].fencers:
 years["2022"][0].new_round({"date":"20220111"})
 cur_round = years["2022"][0].rounds[0] # TODO: should events.new_round() return the round?
 cur_round.allocate_poules()
-cur_round.display_poule()
+cur_round.display_poules()
+
+# cur_round.display_poules(1) # working

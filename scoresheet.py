@@ -22,7 +22,7 @@ class Round:
   
   Methods:
     + allocate_poules() (Allocates fencers into poules based on their rankings from the previous round)
-    + display_poule([poule_num]) (poule_num can be "all" (default) or any integer >= 0 and < self.num_poules)
+    + display_poules([poule_num]) (poule_num can be "all" (default) or any integer >= 0 and < self.num_poules)
     + parse_data() (Extracts and calculates data (w, l, hg, hr, ind) for each fencer)
     + generate_rankings() (Ranks fencers in desc. order based on data from parse_data)
   '''
@@ -46,7 +46,7 @@ class Round:
     # Need to come up with an algorithm/expression to determine num_poules
     # Ideally, you want there to be 6 or 7 fencers per poule in competition fencing
 
-    self.DEFAULT_NUM_POULES = 6
+    self.DEFAULT_NUM_FENCERS = 6 # the default number of fencers per poule. Usu. 6-7
     
     if (num_poules
         and isinstance(num_poules, int)
@@ -54,7 +54,7 @@ class Round:
         and num_poules <= len(self.prev_ranks)):
           self.num_poules = num_poules
     else:
-      self.num_poules = len(self.prev_ranks) // self.DEFAULT_NUM_POULES
+      self.num_poules = len(self.prev_ranks) // self.DEFAULT_NUM_FENCERS
     
     self.poules = [[] for _ in range(self.num_poules)] # Create empty poules
     # print("\nEmpty self.poules:", self.poules)
@@ -83,12 +83,12 @@ class Round:
         index_to = 0 # reset to lower boundary
         direction = 1 # go up
 
-  def display_poule(self, poule_num="all"):
+  def display_poules(self, poule_num="all"):
     '''
     Displays the fencer ids in the given poule.
     Input: poule_num (can be "all" (default) or any integer >= 0 and < self.num_poules)
     '''
-    if poule_num.lower() == "all":
+    if isinstance(poule_num, str) and poule_num.lower() == "all": # isinstance is necessary as integers dont have a .lower() method
       for i, cur_poule in enumerate(self.poules):
         print(f"\n====== Poule {i+1} ======")
         for fencer_id in cur_poule:
