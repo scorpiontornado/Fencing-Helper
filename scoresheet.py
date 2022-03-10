@@ -169,7 +169,7 @@ class Event:
     Inputs: metadata (dict with key "date"), [id_rankings]
     id_rankings overrides the existing rankings from the previous round, e.g. if a fencer is sick for that round
     '''
-    if id_rankings: self.id_rankings = id_rankings # override self.id_rankings if id_rankings is not empty
+    if id_rankings: self.id_rankings = id_rankings # override the current id rankings stored in the event if passed in a new set of id rankings
     self.rounds.append(Round(self, metadata, self.id_rankings)) # create a new round
 
   def get_fencer_by_id(self, fencer_id):
