@@ -18,7 +18,10 @@ cur_round.allocate_poules()
 cur_round.display_poules()
 
 # cur_round.display_poules(1) # working
-poule = 1
+
+poule_num = 1
+poule = cur_round.poules[poule_num-1]
+
 user_input = input("\n\nWhat would you like to do? (You can always type 'help'!) ")
 while user_input:
   user_input = user_input.split()
@@ -31,17 +34,24 @@ while user_input:
   help
   input
 Type "help [command]" to learn more about each command!""")
-    elif arguments[0] == "input":
-      print('Usage: "input [fencer_id1], [score1], [fencer_id2], [score2]"')
+    elif arguments[0] == "score":
+      print('Usage: "score [fencer_id1], [score1], [fencer_id2], [score2]"')
     else:
       print("Command not recognised. Sorry!")
+  
   elif command == "poule":
-    poule = arguments[0]
-  elif command == "input":
+    poule_num = int(arguments[0])
+    poule = cur_round.poules[poule_num-1]
+  
+  elif command == "score" or command == "scores":
     if len(arguments) == 4:
       fencer_id1, score1, fencer_id2, score2 = arguments # set variables
-      # TODO: in the poule object, make a method to search fencers for a fencer_id and return the fencer object
-      # TODO: way to select a particular poule. Should set for the 
+      # TODO: a way to do this that is easier for the user than having to use fencer_ids. Maybe indexes?
+      # TODO: strip scores of non-numeric characters
+
+      poule.input_scores(fencer_id1, score1, fencer_id2, score2) # input the scores
+      poule.display_raw_data() # display the raw data (scores)
+
     else:
       print("Invalid number of arugments.")
   else:

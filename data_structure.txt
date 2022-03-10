@@ -26,7 +26,7 @@ years = {
           }
           poules = [
             Poule object
-              fencers = fencer_id[] (keys corresponding to raw_data)
+              fencer_ids = fencer_id[] (keys corresponding to raw_data)
               raw_data (basically user input into scorecard)
           ]
       ]
