@@ -1,12 +1,23 @@
 class Poule:
   '''
-  A poule is a group of fencers that verse each other in a round-robin type format, where each fencer bouts every other fencer once. 
+  A poule is a group of fencers that verse each other in a round-robin type format, where each fencer bouts every other fencer once.
+
+  For the MVP, inputs will ideally happen like this:
+    input ID001 0, ID002 5
+  or
+    input ID004 V5 ID003 D2
+  (All non-numerical digits are ignored in the 3rd and 5th "words")
 
   Attributes:
-    + fencer_id[]: keys (parallel to the rows/columns, used to find which fencer is at which row/column)
-    + String[][]: raw_data (user input into scorecard)
+    + fencer_id[]: fencers (keys - parallel to the rows/columns, used to find which fencer is at which row/column)
+    + String[][]: raw_data (user input into scorecard). Rows signify the hits scored by the fencer against the people in the columns. E.g. using raw_data[row][column], raw_data[0][1] would be the number of times the fencer in index 0 hit the fencer in index 1. The main diagonal should remain empty.
+
+  Methods:
+    + input_data(row, ro)
   '''
-  pass
+  def __init__(self, fencers):
+    self.fencers = fencers # todo: some sort of failsafe if 0 fencers?
+    self.raw_data = [[" " for _ in range(len(self.fencers))] for _ in range(len(self.fencers))] # initialise empty scorecard with all values " "
 
 class Round:
   '''
