@@ -21,6 +21,7 @@ cur_round.display_poules()
 
 poule_num = 1
 poule = cur_round.poules[poule_num-1]
+poule.display_raw_data() # display the raw data (scores)
 
 user_input = input("\n\nWhat would you like to do? (You can always type 'help'!) ")
 while user_input:

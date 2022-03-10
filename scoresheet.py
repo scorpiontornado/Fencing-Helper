@@ -19,7 +19,10 @@ class Poule:
     self.fencer_ids = [] # todo: some sort of failsafe if 0 fencers?
 
   def init_raw_data(self):
-    self.raw_data = [[" " for _ in range(len(self.fencer_ids))] for _ in range(len(self.fencer_ids))] # initialise empty scorecard with all values " "
+    self.raw_data = [["_" for _ in range(len(self.fencer_ids))] for _ in range(len(self.fencer_ids))] # initialise empty scorecard with all values " "
+    # initialise main diagonal with "X"s
+    for i in range(len(self.fencer_ids)):
+      self.raw_data[i][i] = "X"
 
   def get_index(self, fencer_id):
     ''' Returns the index associated with the given fencer_id '''
@@ -31,16 +34,20 @@ class Poule:
     # TODO: should I allow index input instead of fencer ids?
     
     # Find the index of the inputted fencer ids
-    index1 = self.get_index(fencer_id1)
+    index1 = self.get_index(fencer_id1) # Todo: have a failsafe if this returns None
     index2 = self.get_index(fencer_id2)
-    print(index1, index2)
+    #print(index1, index2)
     
     self.raw_data[index1][index2] = score1
     self.raw_data[index2][index1] = score2
 
   def display_raw_data(self):
     # Should this be called display_scores?
-    print(self.raw_data) # TODO: better print function
+    #print(self.raw_data) # TODO: better print function
+
+    # https://stackoverflow.com/questions/17870612/printing-a-two-dimensional-array-in-python
+    print('\n'.join([''.join(['{:4}'.format(item) for item in row]) 
+      for row in self.raw_data]))
 
 class Round:
   '''
