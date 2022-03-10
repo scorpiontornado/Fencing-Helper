@@ -48,6 +48,8 @@ class Round:
     # Need to come up with an algorithm/expression to determine num_poules
     # Ideally, you want there to be 6 or 7 fencers per poule in competition fencing
 
+    # TODO: allocate fencers to Poule objects rather than a 2-D list
+
     self.DEFAULT_NUM_FENCERS = 6 # the default number of fencers per poule. Usu. 6-7
     
     if (num_poules

@@ -13,7 +13,7 @@ years = {
 
       fencers = [
         Fencer object
-          fencer_id ("ID" + integer, e.g. "ID25" "ID1")
+          fencer_id ("ID" + integer, e.g. "ID025" "ID001")
           name
       ]
 
@@ -34,6 +34,10 @@ years = {
   "2020": events
   "2021": events
 }
+
+
+
+
 
 
 
