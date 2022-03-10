@@ -92,7 +92,7 @@ class Round:
     Displays the fencer ids in the given poule.
     Input: poule_num (can be "all" (default) or any integer >= 0 and < self.num_poules)
     '''
-    if isinstance(poule_num, str) and poule_num.lower() == "all": # isinstance is necessary as integers dont have a .lower() method
+    if isinstance(poule_num, str) and poule_num.lower() == "all": # check to see if the user wants to display all poules. isinstance is necessary (to check that the input is a string) as integers dont have a .lower() method
       for i, cur_poule in enumerate(self.poules):
         print(f"\n ========= Poule {i+1} =========")
         for fencer_id in cur_poule:
