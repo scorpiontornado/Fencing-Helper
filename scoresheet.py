@@ -3,7 +3,7 @@ class Poule:
   A poule is a group of fencers that verse each other in a round-robin type format, where each fencer bouts every other fencer once. 
 
   Attributes:
-    + fencer_id[]: key (parallel to the rows/columns, used to find which fencer is at which row/column)
+    + fencer_id[]: keys (parallel to the rows/columns, used to find which fencer is at which row/column)
     + String[][]: raw_data (user input into scorecard)
   '''
   pass
