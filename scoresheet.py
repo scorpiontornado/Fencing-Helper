@@ -48,6 +48,8 @@ class Round:
     # Need to come up with an algorithm/expression to determine num_poules
     # Ideally, you want there to be 6 or 7 fencers per poule in competition fencing
 
+    # TODO: allocate fencers to Poule objects rather than a 2-D list
+
     self.DEFAULT_NUM_FENCERS = 6 # the default number of fencers per poule. Usu. 6-7
     
     if (num_poules
@@ -90,7 +92,7 @@ class Round:
     Displays the fencer ids in the given poule.
     Input: poule_num (can be "all" (default) or any integer >= 0 and < self.num_poules)
     '''
-    if isinstance(poule_num, str) and poule_num.lower() == "all": # isinstance is necessary as integers dont have a .lower() method
+    if isinstance(poule_num, str) and poule_num.lower() == "all": # check to see if the user wants to display all poules. isinstance is necessary (to check that the input is a string) as integers dont have a .lower() method
       for i, cur_poule in enumerate(self.poules):
         print(f"\n ========= Poule {i+1} =========")
         for fencer_id in cur_poule:
@@ -167,7 +169,7 @@ class Event:
     Inputs: metadata (dict with key "date"), [id_rankings]
     id_rankings overrides the existing rankings from the previous round, e.g. if a fencer is sick for that round
     '''
-    if id_rankings: self.id_rankings = id_rankings # override self.id_rankings if id_rankings is not empty
+    if id_rankings: self.id_rankings = id_rankings # override the current id rankings stored in the event if passed in a new set of id rankings
     self.rounds.append(Round(self, metadata, self.id_rankings)) # create a new round
 
   def get_fencer_by_id(self, fencer_id):
