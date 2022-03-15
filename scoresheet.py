@@ -36,10 +36,15 @@ class Poule:
     # Find the index of the inputted fencer ids
     index1 = self.get_index(fencer_id1) # Todo: have a failsafe if this returns None
     index2 = self.get_index(fencer_id2)
-    #print(index1, index2)
-    
-    self.raw_data[index1][index2] = score1
-    self.raw_data[index2][index1] = score2
+    # print(index1, index2)
+
+    # check both ids are present in the poule
+    # can't use "if index1 and index2" because index = 0 will == False
+    if index1 != None and index2 != None: 
+      self.raw_data[index1][index2] = score1
+      self.raw_data[index2][index1] = score2
+    else:
+      print("Invalid ID")
 
   def display_raw_data(self):
     # Should this be called display_scores?
