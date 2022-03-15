@@ -1,12 +1,58 @@
 class Poule:
   '''
-  A poule is a group of fencers that verse each other in a round-robin type format, where each fencer bouts every other fencer once. 
+  A poule is a group of fencers that verse each other in a round-robin type format, where each fencer bouts every other fencer once.
+
+  For the MVP, inputs will ideally happen like this:
+    input ID001 0, ID002 5
+  or
+    input ID004 V5 ID003 D2
+  (All non-numerical digits are ignored in the 3rd and 5th "words")
 
   Attributes:
-    + fencer_id[]: key (parallel to the rows/columns, used to find which fencer is at which row/column)
-    + String[][]: raw_data (user input into scorecard)
+    + fencer_id[]: fencer_ids (keys - parallel to the rows/columns, used to find which fencer is at which row/column)
+    + String[][]: raw_data (user input into scorecard). Rows signify the hits scored by the fencer against the people in the columns. E.g. using raw_data[row][column], raw_data[0][1] would be the number of times the fencer in index 0 hit the fencer in index 1. The main diagonal should remain empty.
+
+  Methods:
+    + input_data(fencer1, score1, fencer2, score2)
   '''
-  pass
+  def __init__(self):
+    self.fencer_ids = [] # todo: some sort of failsafe if 0 fencers?
+
+  def init_raw_data(self):
+    self.raw_data = [["_" for _ in range(len(self.fencer_ids))] for _ in range(len(self.fencer_ids))] # initialise empty scorecard with all values " "
+    # initialise main diagonal with "X"s
+    for i in range(len(self.fencer_ids)):
+      self.raw_data[i][i] = "X"
+
+  def get_index(self, fencer_id):
+    ''' Returns the index associated with the given fencer_id '''
+    # Linear search
+    for i, cur_id in enumerate(self.fencer_ids):
+      if cur_id == fencer_id: return i
+
+  def input_scores(self, fencer_id1, score1, fencer_id2, score2):
+    # TODO: should I allow index input instead of fencer ids?
+    
+    # Find the index of the inputted fencer ids
+    index1 = self.get_index(fencer_id1) # Todo: have a failsafe if this returns None
+    index2 = self.get_index(fencer_id2)
+    # print(index1, index2)
+
+    # check both ids are present in the poule
+    # can't use "if index1 and index2" because index = 0 will == False
+    if index1 != None and index2 != None: 
+      self.raw_data[index1][index2] = score1
+      self.raw_data[index2][index1] = score2
+    else:
+      print("Invalid ID")
+
+  def display_raw_data(self):
+    # Should this be called display_scores?
+    #print(self.raw_data) # TODO: better print function
+
+    # https://stackoverflow.com/questions/17870612/printing-a-two-dimensional-array-in-python
+    print('\n'.join([''.join(['{:4}'.format(item) for item in row]) 
+      for row in self.raw_data]))
 
 class Round:
   '''
@@ -56,11 +102,11 @@ class Round:
         and isinstance(num_poules, int)
         and num_poules > 0
         and num_poules <= len(self.prev_ranks)):
-          self.num_poules = num_poules
+          self.num_poules = num_poules # assign the number of poules manually
     else:
-      self.num_poules = len(self.prev_ranks) // self.DEFAULT_NUM_FENCERS
+      self.num_poules = len(self.prev_ranks) // self.DEFAULT_NUM_FENCERS # auto-determine number of poules
     
-    self.poules = [[] for _ in range(self.num_poules)] # Create empty poules
+    self.poules = [Poule() for _ in range(self.num_poules)] # Create empty poules
     # print("\nEmpty self.poules:", self.poules)
     # print("self.prev_ranks:", self.prev_ranks)
   
@@ -70,7 +116,7 @@ class Round:
   
     while index_from < len(self.prev_ranks):
       # 1. Assign fencer to poule
-      self.poules[index_to].append(self.prev_ranks[index_from])
+      self.poules[index_to].fencer_ids.append(self.prev_ranks[index_from])
   
       # 2. Increment index_from by 1
       index_from += 1
@@ -87,6 +133,10 @@ class Round:
         index_to = 0 # reset to lower boundary
         direction = 1 # go up
 
+    # Initialise each poule
+    for poule in self.poules:
+      poule.init_raw_data()
+
   def display_poules(self, poule_num="all"):
     '''
     Displays the fencer ids in the given poule.
@@ -95,12 +145,12 @@ class Round:
     if isinstance(poule_num, str) and poule_num.lower() == "all": # check to see if the user wants to display all poules. isinstance is necessary (to check that the input is a string) as integers dont have a .lower() method
       for i, cur_poule in enumerate(self.poules):
         print(f"\n ========= Poule {i+1} =========")
-        for fencer_id in cur_poule:
+        for fencer_id in cur_poule.fencer_ids:
           fencer = self.parent.get_fencer_by_id(fencer_id)
-          print(fencer)
+          print(fencer) # TODO: put index next to fencer?
     elif isinstance(poule_num, int) and poule_num >= 0 and poule_num < self.num_poules:
       print(f"\n ========= Poule {poule_num} =========")
-      for fencer_id in self.poules[poule_num-1]: # -1 because users will expect it to be 1-indexed rather than 0-indexed
+      for fencer_id in self.poules[poule_num-1].fencer_ids: # -1 because users will expect it to be 1-indexed rather than 0-indexed
         fencer = self.parent.get_fencer_by_id(fencer_id)
         print(fencer)
     else:
