@@ -40,7 +40,7 @@ class Poule:
 
     # check both ids are present in the poule
     # can't use "if index1 and index2" because index = 0 will == False
-    if index1 != None and index2 != None: 
+    if index1 != None and index2 != None:
       self.raw_data[index1][index2] = score1
       self.raw_data[index2][index1] = score2
     else:
@@ -51,7 +51,7 @@ class Poule:
     #print(self.raw_data) # TODO: better print function
 
     # https://stackoverflow.com/questions/17870612/printing-a-two-dimensional-array-in-python
-    print('\n'.join([''.join(['{:4}'.format(item) for item in row]) 
+    print('\n'.join([''.join(['{:4}'.format(str(item)) for item in row]) 
       for row in self.raw_data]))
 
 class Round:

@@ -1,6 +1,6 @@
 # For the moment, all setup and input happens here. I might modularise/abstract this later.
-
 import scoresheet
+import re
 
 years = {}
 
@@ -48,7 +48,12 @@ Type "help [command]" to learn more about each command!""")
     if len(arguments) == 4:
       fencer_id1, score1, fencer_id2, score2 = arguments # set variables
       # TODO: a way to do this that is easier for the user than having to use fencer_ids. Maybe indexes?
-      # TODO: strip scores of non-numeric characters
+
+      # Strip scores of non-numeric characters using regex
+      # https://stackoverflow.com/questions/1450897/remove-characters-except-digits-from-string-using-python#comment103764679_1450900
+      score1 = int(re.sub(r"\D+", "", score1)) # \D matches any non-digit character
+      score2 = int(re.sub(r"\D+", "", score2)) # \D matches any non-digit character
+      print("score1:", score1, score2)
 
       poule.input_scores(fencer_id1, score1, fencer_id2, score2) # input the scores
       poule.display_raw_data() # display the raw data (scores)
