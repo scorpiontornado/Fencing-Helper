@@ -17,3 +17,5 @@ Licenses:
 https://note.nkmk.me/en/python-check-int-float/
 
 https://stackoverflow.com/questions/9539921/how-do-i-create-a-python-function-with-optional-arguments
+
+https://stackoverflow.com/questions/17870612/printing-a-two-dimensional-array-in-python
