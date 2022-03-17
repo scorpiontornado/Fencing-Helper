@@ -21,6 +21,16 @@ cur_round.display_poules()
 
 poule_num = 1
 poule = cur_round.poules[poule_num-1]
+
+poule.raw_data = [
+  ["X", 5, 4, 5, 2, 5],
+  [1, "X", 3, 5, 2, 3],
+  [5, 5, "X", 4, 3, 5],
+  [2, 4, 5, "X", 3, 4],
+  [5, 5, 5, 5, "X", 5],
+  [4, 5, 4, 5, 3, "X"],
+] # debugging
+
 poule.display_raw_data() # display the raw data (scores)
 
 user_input = input("\n\nWhat would you like to do? (You can always type 'help'!) ")
@@ -33,7 +43,9 @@ while user_input:
     if not arguments:  
       print("""Here is a list of commands you can do:
   help
-  input
+  poule
+  score
+  process
 Type "help [command]" to learn more about each command!""")
     elif arguments[0] == "score":
       print('Usage: "score [fencer_id1], [score1], [fencer_id2], [score2]"')
@@ -51,7 +63,7 @@ Type "help [command]" to learn more about each command!""")
 
       # Strip scores of non-numeric characters using regex
       # https://stackoverflow.com/questions/1450897/remove-characters-except-digits-from-string-using-python#comment103764679_1450900
-      score1 = int(re.sub(r"\D+", "", score1)) # \D matches any non-digit character
+      score1 = int(re.sub(r"\D+", "", score1)) # \D matches any non-digit character # TODO: store as int or string?
       score2 = int(re.sub(r"\D+", "", score2)) # \D matches any non-digit character
       print("score1:", score1, score2)
 
@@ -60,6 +72,9 @@ Type "help [command]" to learn more about each command!""")
 
     else:
       print("Invalid number of arugments.")
+  elif command == "process":
+    cur_round.process_data()
+    cur_round.display_processed_data()
   else:
     print("Command not recognised. Sorry!")
   

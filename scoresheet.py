@@ -13,12 +13,17 @@ class Poule:
     + String[][]: raw_data (user input into scorecard). Rows signify the hits scored by the fencer against the people in the columns. E.g. using raw_data[row][column], raw_data[0][1] would be the number of times the fencer in index 0 hit the fencer in index 1. The main diagonal should remain empty.
 
   Methods:
-    + input_data(fencer1, score1, fencer2, score2)
+    + init_raw_data()
+    + get_index(fencer_id)
+    + input_scores(fencer_id1, score1, fencer_id2, score2)
   '''
   def __init__(self):
     self.fencer_ids = [] # todo: some sort of failsafe if 0 fencers?
 
   def init_raw_data(self):
+    '''
+    Initialise the raw data (2-D array) with the correct number of rows and collumns, and populate the main diagonal with "X"s
+    '''
     self.raw_data = [["_" for _ in range(len(self.fencer_ids))] for _ in range(len(self.fencer_ids))] # initialise empty scorecard with all values " "
     # initialise main diagonal with "X"s
     for i in range(len(self.fencer_ids)):
@@ -31,6 +36,9 @@ class Poule:
       if cur_id == fencer_id: return i
 
   def input_scores(self, fencer_id1, score1, fencer_id2, score2):
+    '''
+    Input the results of a bout / the scores of two fencers
+    '''
     # TODO: should I allow index input instead of fencer ids?
     
     # Find the index of the inputted fencer ids
@@ -47,6 +55,9 @@ class Poule:
       print("Invalid ID")
 
   def display_raw_data(self):
+    '''
+    WIP. Print the raw data to the screen.
+    '''
     # Should this be called display_scores?
     #print(self.raw_data) # TODO: better print function
 
@@ -62,15 +73,16 @@ class Round:
     + dict: metadata (contains dates the round occured over)
     + fencer_id[]: prev_ranks (rankings from the previous round, sorted in desc. order, best to worst)
     + fencer_id[]: new_ranks (rankings generated from this round, sorted in desc. order, best to worst)
-    + dict: fencer_data (contains wins (w), losses (l), hits gained (hg), hits received (hr), and indicator (ind; hg - hr) for each fencer)
+    + dict: processed_data (contains wins (w), losses (l), hits gained (hg), hits received (hr), and indicator (ind; hg - hr) for each fencer)
     + int: num_poules (ideally enough to ensure 6 or 7 fencers are in each poule)
     + Poule[]: poules
   
   Methods:
     + allocate_poules() (Allocates fencers into poules based on their rankings from the previous round)
     + display_poules([poule_num]) (poule_num can be "all" (default) or any integer >= 0 and < self.num_poules)
-    + parse_data() (Extracts and calculates data (w, l, hg, hr, ind) for each fencer)
-    + generate_rankings() (Ranks fencers in desc. order based on data from parse_data)
+    + process_data() (Extracts and calculates data (w, l, hg, hr, ind) for each fencer)
+    + display_processed_data()
+    + generate_rankings() (Ranks fencers in desc. order based on data from process_data)
   '''
   # TODO: Should fencers be here or in year? Should be easy enough to change, just pass in fencers to input. But, do I want changes to fencers here to affect fencers globally?
   def __init__(self, parent, metadata, prev_ranks):
@@ -155,7 +167,61 @@ class Round:
         print(fencer)
     else:
       print("Invalid poule number")
-  
+
+  def process_data(self):
+    '''
+    Proceeses (extracts & calculates) the data from raw data:
+      w: wins
+      l: losses
+      hg: hits gained (number of times you hit your opponent)
+      hr: hits received (number of times you are hit by your opponent)
+      ind: indicator (hg-hr) (the higher the better)
+    
+    Extracts and calculates data (w, l, hg, hr, ind) for each fencer
+    '''
+    # Loop through all fencers
+    self.processed_data = {}
+    for poule in self.poules:
+      for i, row in enumerate(poule.raw_data):
+        # Note: fencer_ids[index] returns the fencer_id for the given index
+        cur_fencer_id = poule.fencer_ids[i]
+        self.processed_data[cur_fencer_id] = {
+          "w": 0,
+          "l": 0,
+          "hg": 0,
+          "hr": 0,
+          "ind": 0,
+        } # initialise dictionary for current fencer_id
+        
+        # Loop over all opponents for the current fencer
+        for j, value in enumerate(row):
+          if (i == j
+              or not isinstance(poule.raw_data[i][j], int)
+              or not isinstance(poule.raw_data[j][i], int)):
+            # If on main diagonal or if the position is not an integer (e.g. "_")
+            # FIXME: i == j is redundant because the main diagonal should contain "X"s anyway... but I'm too scared to delete it
+            continue
+          
+          # Check wins and losses
+          if poule.raw_data[i][j] > poule.raw_data[j][i]: # Check if the current fencer beat their opponent
+             self.processed_data[cur_fencer_id]["w"] += 1
+          else: # If lost
+            self.processed_data[cur_fencer_id]["l"] += 1
+
+          # hits gained
+          # print(i, j, "poule.raw_data[i][j]", poule.raw_data[i][j])
+          self.processed_data[cur_fencer_id]["hg"] += poule.raw_data[i][j]
+          
+          # hits received
+          self.processed_data[cur_fencer_id]["hr"] += poule.raw_data[j][i]
+          
+        # indicator
+        self.processed_data[cur_fencer_id]["ind"] = self.processed_data[cur_fencer_id]["hg"] - self.processed_data[cur_fencer_id]["hr"]
+
+  def display_processed_data(self):
+    for fencer_id in self.processed_data:
+      print(f"{fencer_id}:", self.processed_data[fencer_id])
+    
 class Fencer:
   '''
   A single fencer, containing data for the current round only
