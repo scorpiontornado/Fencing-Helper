@@ -21,3 +21,6 @@ https://stackoverflow.com/questions/9539921/how-do-i-create-a-python-function-wi
 https://stackoverflow.com/questions/17870612/printing-a-two-dimensional-array-in-python
 
 https://stackoverflow.com/questions/1450897/remove-characters-except-digits-from-string-using-python#comment103764679_1450900
+
+https://academyoffencingmasters.com/blog/how-and-why-you-must-check-your-fencing-scoresheet/
+https://rocfencing.com/parents-corner-october-2015-understanding-pool-results-in-a-tournament/

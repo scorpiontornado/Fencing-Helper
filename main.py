@@ -30,7 +30,6 @@ poule.raw_data = [
   [5, 5, 5, 5, "X", 5],
   [4, 5, 4, 5, 3, "X"],
 ] # debugging
-
 poule.display_raw_data() # display the raw data (scores)
 
 user_input = input("\n\nWhat would you like to do? (You can always type 'help'!) ")
@@ -55,6 +54,7 @@ Type "help [command]" to learn more about each command!""")
   elif command == "poule":
     poule_num = int(arguments[0])
     poule = cur_round.poules[poule_num-1]
+    poule.display_raw_data() # display the raw data (scores)
   
   elif command == "score" or command == "scores":
     if len(arguments) == 4:

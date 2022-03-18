@@ -171,12 +171,16 @@ class Round:
   def process_data(self):
     '''
     Proceeses (extracts & calculates) the data from raw data:
-      w: wins
-      l: losses
+      v: number of victories
+      b: number of bouts fenced in the poule by the particular fencer
+      v/b: relative number of victories - victories divided by number of bouts bouts fenced in the poule by the particular fencer
       hg: hits gained (number of times you hit your opponent)
       hr: hits received (number of times you are hit by your opponent)
       ind: indicator (hg-hr) (the higher the better)
-    
+
+    note: losses are unnecessary to store
+    note2: scoresheets in other countries seem to use v, v/m, ts (touches scored), tr, ind
+    TODO: wins or w or or v? v is consistent with what I have found, and with "V5", but SACS' scoresheet says "wins"
     Extracts and calculates data (w, l, hg, hr, ind) for each fencer
     '''
     # Loop through all fencers
@@ -186,12 +190,11 @@ class Round:
         # Note: fencer_ids[index] returns the fencer_id for the given index
         cur_fencer_id = poule.fencer_ids[i]
         self.processed_data[cur_fencer_id] = {
-          "w": 0,
-          "l": 0,
+          "v": 0,
+          "b": 0,
           "hg": 0,
           "hr": 0,
-          "ind": 0,
-        } # initialise dictionary for current fencer_id
+        } # initialise dictionary for current fencer_id (note that v/b and ind are set later)
         
         # Loop over all opponents for the current fencer
         for j, value in enumerate(row):
@@ -201,12 +204,11 @@ class Round:
             # If on main diagonal or if the position is not an integer (e.g. "_")
             # FIXME: i == j is redundant because the main diagonal should contain "X"s anyway... but I'm too scared to delete it
             continue
-          
-          # Check wins and losses
-          if poule.raw_data[i][j] > poule.raw_data[j][i]: # Check if the current fencer beat their opponent
-             self.processed_data[cur_fencer_id]["w"] += 1
-          else: # If lost
-            self.processed_data[cur_fencer_id]["l"] += 1
+
+          self.processed_data[cur_fencer_id]["b"] += 1 # Increment number of bouts fenced
+          # Check wins
+          if poule.raw_data[i][j] > poule.raw_data[j][i]:
+             self.processed_data[cur_fencer_id]["v"] += 1
 
           # hits gained
           # print(i, j, "poule.raw_data[i][j]", poule.raw_data[i][j])
@@ -215,6 +217,11 @@ class Round:
           # hits received
           self.processed_data[cur_fencer_id]["hr"] += poule.raw_data[j][i]
           
+        # relative bouts
+        if self.processed_data[cur_fencer_id]["b"] == 0:
+          self.processed_data[cur_fencer_id]["v/b"] = 0 # Avoid dividing by zero
+        else:
+          self.processed_data[cur_fencer_id]["v/b"] = self.processed_data[cur_fencer_id]["v"] / self.processed_data[cur_fencer_id]["b"]  
         # indicator
         self.processed_data[cur_fencer_id]["ind"] = self.processed_data[cur_fencer_id]["hg"] - self.processed_data[cur_fencer_id]["hr"]
 

@@ -22,7 +22,7 @@ years = {
           metadata = {dates: Datetime object}
           rankings = fencer_id[] (sorted in desc. order, best to worst)
           processed_data = {
-            fencer_id: {"w", "l", "hg", "hr", "ind"}
+            fencer_id: {"v", "m", "v/m", hg", "hr", "ind"}
           }
           poules = [
             Poule object
