@@ -81,8 +81,11 @@ class Round:
     + allocate_poules() (Allocates fencers into poules based on their rankings from the previous round)
     + display_poules([poule_num]) (poule_num can be "all" (default) or any integer >= 0 and < self.num_poules)
     + process_data() (Extracts and calculates data (w, l, hg, hr, ind) for each fencer)
-    + display_processed_data()
     + generate_rankings() (Ranks fencers in desc. order based on data from process_data)
+    - dict_print(dict_) (Prints a given dictionary. Used in display_results)
+    + display_results() (Displays the ranked results)
+  
+  # possibly TODO: make consistent. Rankings or results?
   '''
   # TODO: Should fencers be here or in year? Should be easy enough to change, just pass in fencers to input. But, do I want changes to fencers here to affect fencers globally?
   def __init__(self, parent, metadata, prev_ranks):
@@ -170,28 +173,26 @@ class Round:
 
   def process_data(self):
     '''
-    Proceeses (extracts & calculates) the data from raw data:
+    Processes (extracts & calculates) the data from raw data:
       v: number of victories
-      b: number of bouts fenced in the poule by the particular fencer
-      v/b: relative number of victories - victories divided by number of bouts bouts fenced in the poule by the particular fencer
+      m: number of matches (bouts) fenced in the poule by the particular fencer
+      v/m: relative number of victories, v divided by m
       hg: hits gained (number of times you hit your opponent)
       hr: hits received (number of times you are hit by your opponent)
-      ind: indicator (hg-hr) (the higher the better)
-
-    note: losses are unnecessary to store
-    note2: scoresheets in other countries seem to use v, v/m, ts (touches scored), tr, ind
-    TODO: wins or w or or v? v is consistent with what I have found, and with "V5", but SACS' scoresheet says "wins"
-    Extracts and calculates data (w, l, hg, hr, ind) for each fencer
+      ind: indicator, hg minus hr (hg-hr) (the higher the better)
+    
+    Creates one property:
+      self.unranked_results: processed, unranked results (i.e. dictionary of dictionaries containing v, m ... for each fencer_id)
     '''
     # Loop through all fencers
-    self.processed_data = {}
+    self.unranked_results = {}
     for poule in self.poules:
       for i, row in enumerate(poule.raw_data):
         # Note: fencer_ids[index] returns the fencer_id for the given index
         cur_fencer_id = poule.fencer_ids[i]
-        self.processed_data[cur_fencer_id] = {
+        self.unranked_results[cur_fencer_id] = {
           "v": 0,
-          "b": 0,
+          "m": 0,
           "hg": 0,
           "hr": 0,
         } # initialise dictionary for current fencer_id (note that v/b and ind are set later)
@@ -205,29 +206,56 @@ class Round:
             # FIXME: i == j is redundant because the main diagonal should contain "X"s anyway... but I'm too scared to delete it
             continue
 
-          self.processed_data[cur_fencer_id]["b"] += 1 # Increment number of bouts fenced
+          self.unranked_results[cur_fencer_id]["m"] += 1 # Increment number of bouts fenced
           # Check wins
           if poule.raw_data[i][j] > poule.raw_data[j][i]:
-             self.processed_data[cur_fencer_id]["v"] += 1
+             self.unranked_results[cur_fencer_id]["v"] += 1
 
           # hits gained
           # print(i, j, "poule.raw_data[i][j]", poule.raw_data[i][j])
-          self.processed_data[cur_fencer_id]["hg"] += poule.raw_data[i][j]
+          self.unranked_results[cur_fencer_id]["hg"] += poule.raw_data[i][j]
           
           # hits received
-          self.processed_data[cur_fencer_id]["hr"] += poule.raw_data[j][i]
+          self.unranked_results[cur_fencer_id]["hr"] += poule.raw_data[j][i]
           
         # relative bouts
-        if self.processed_data[cur_fencer_id]["b"] == 0:
-          self.processed_data[cur_fencer_id]["v/b"] = 0 # Avoid dividing by zero
+        if self.unranked_results[cur_fencer_id]["m"] == 0:
+          self.unranked_results[cur_fencer_id]["v/m"] = 0 # Avoid dividing by zero
         else:
-          self.processed_data[cur_fencer_id]["v/b"] = self.processed_data[cur_fencer_id]["v"] / self.processed_data[cur_fencer_id]["b"]  
+          self.unranked_results[cur_fencer_id]["v/m"] = self.unranked_results[cur_fencer_id]["v"] / self.unranked_results[cur_fencer_id]["m"]  
         # indicator
-        self.processed_data[cur_fencer_id]["ind"] = self.processed_data[cur_fencer_id]["hg"] - self.processed_data[cur_fencer_id]["hr"]
+        self.unranked_results[cur_fencer_id]["ind"] = self.unranked_results[cur_fencer_id]["hg"] - self.unranked_results[cur_fencer_id]["hr"]
 
-  def display_processed_data(self):
-    for fencer_id in self.processed_data:
-      print(f"{fencer_id}:", self.processed_data[fencer_id])
+  def generate_rankings(self):
+    '''
+    Creates two properties using self.unranked_results (from self.process_data()):
+      self.ranked_results: processed, ranked results (sorted dictionary of dictionaries). For displaying round results
+      self.new_id_rankings: sorted list of fencer_ids. For creating the next round's poules.
+    '''
+    # TODO: remove. Testing.
+    # print("Inside generate_rankings")
+    # print("self.unranked_results:")
+    # self.dict_print(self.unranked_results)
+
+    self.id_rankings = sorted(self.unranked_results, key = lambda fid: (self.unranked_results[fid].get("v/m", 0), self.unranked_results[fid].get("ind", 0), self.unranked_results[fid].get("hg", 0)), reverse = True) # list of sorted keys (fencer_ids), sorted first by v/m, then by ind, then by hg.
+    self.ranked_results = {fid:self.unranked_results[fid] for fid in self.id_rankings}
+    # TODO: ties. Get the fencers to fence again, do a coin toss, or display a T after the rank, e.g. "21T"
+
+    # TODO: remove. Testing.
+    # print("self.id_rankings:")
+    # print(self.id_rankings)
+    # print("\nself.ranked_results:")
+    # self.dict_print(self.ranked_results)
+
+  def dict_print(self, dict_):
+    ''' Prints a dictionary in a nicer way. Used in display_results and debugging. '''
+    for key in dict_:
+      print(f"{key}: {dict_[key]}")
+    print()
+
+  def display_results(self):
+    ''' Displays the dictionary of ranked results'''
+    self.dict_print(self.ranked_results)
     
 class Fencer:
   '''

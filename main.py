@@ -56,7 +56,7 @@ Type "help [command]" to learn more about each command!""")
     poule = cur_round.poules[poule_num-1]
     poule.display_raw_data() # display the raw data (scores)
   
-  elif command == "score" or command == "scores":
+  elif command in ("score", "scores"):
     if len(arguments) == 4:
       fencer_id1, score1, fencer_id2, score2 = arguments # set variables
       # TODO: a way to do this that is easier for the user than having to use fencer_ids. Maybe indexes?
@@ -72,9 +72,14 @@ Type "help [command]" to learn more about each command!""")
 
     else:
       print("Invalid number of arugments.")
-  elif command == "process":
+      
+  elif command in ("process", "rankings", "results"):
     cur_round.process_data()
-    cur_round.display_processed_data()
+    cur_round.generate_rankings()
+    # print("Outside")
+    cur_round.display_results()
+    # print(cur_round.unranked_results) # for testing
+    
   else:
     print("Command not recognised. Sorry!")
   
