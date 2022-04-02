@@ -312,6 +312,7 @@ class Event:
     Output: round object that was just created
     '''
     if id_rankings: self.id_rankings = id_rankings # override the current id rankings stored in the event if passed in a new set of id rankings
+    print("self.id_rankings", self.id_rankings)
     self.rounds.append(Round(self, metadata, self.id_rankings)) # create a new round
 
     return self.rounds[-1]
