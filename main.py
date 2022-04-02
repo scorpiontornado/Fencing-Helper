@@ -9,20 +9,23 @@ years = {}
 
 years["2022"] = [scoresheet.Event({"months": "Jan-Mar", "school_years": "10-12", "weapon": "epee", "type": "individual"}, "name_rankings.txt")]
 
-for fencer in years["2022"][0].fencers:
+cur_event = years["2022"][0]
+
+for fencer in cur_event.fencers:
   print(fencer)
 
-years["2022"][0].new_round({"date":"20220111"})
-cur_round = years["2022"][0].rounds[0] # TODO: should events.new_round() return the round?
+cur_round = cur_event.new_round({"date":"20220111"})
+round_num = 1
+print("ROUND {round_num}")
 cur_round.allocate_poules()
 cur_round.display_poules()
 
 # cur_round.display_poules(1) # working
 
 poule_num = 1
-poule = cur_round.poules[poule_num-1]
+cur_poule = cur_round.poules[poule_num-1]
 
-poule.raw_data = [
+cur_poule.raw_data = [
   ["X", 5, 4, 5, 2, 5],
   [1, "X", 3, 5, 2, 3],
   [5, 5, "X", 4, 3, 5],
@@ -30,7 +33,7 @@ poule.raw_data = [
   [5, 5, 5, 5, "X", 5],
   [4, 5, 4, 5, 3, "X"],
 ] # debugging
-poule.display_raw_data() # display the raw data (scores)
+cur_poule.display_raw_data() # display the raw data (scores)
 
 user_input = input("\n\nWhat would you like to do? (You can always type 'help'!) ")
 while user_input:
@@ -45,6 +48,7 @@ while user_input:
   poule
   score
   process
+  create
 Type "help [command]" to learn more about each command!""")
     elif arguments[0] == "score":
       print('Usage: "score [fencer_id1], [score1], [fencer_id2], [score2]"')
@@ -53,8 +57,11 @@ Type "help [command]" to learn more about each command!""")
   
   elif command == "poule":
     poule_num = int(arguments[0])
-    poule = cur_round.poules[poule_num-1]
-    poule.display_raw_data() # display the raw data (scores)
+    cur_poule = cur_round.poules[poule_num-1]
+
+    cur_round.display_poules(poule_num)
+    
+    cur_poule.display_raw_data() # display the raw data (scores)
   
   elif command in ("score", "scores"):
     if len(arguments) == 4:
@@ -67,8 +74,8 @@ Type "help [command]" to learn more about each command!""")
       score2 = int(re.sub(r"\D+", "", score2)) # \D matches any non-digit character
       print("score1:", score1, score2)
 
-      poule.input_scores(fencer_id1, score1, fencer_id2, score2) # input the scores
-      poule.display_raw_data() # display the raw data (scores)
+      cur_poule.input_scores(fencer_id1, score1, fencer_id2, score2) # input the scores
+      cur_poule.display_raw_data() # display the raw data (scores)
 
     else:
       print("Invalid number of arugments.")
@@ -76,10 +83,41 @@ Type "help [command]" to learn more about each command!""")
   elif command in ("process", "rankings", "results"):
     cur_round.process_data()
     cur_round.generate_rankings()
-    # print("Outside")
     cur_round.display_results()
     # print(cur_round.unranked_results) # for testing
-    
+    new_ranks = list(cur_round.ranked_results.keys()) # Get sorted list of fencer ids
+    print(new_ranks)
+
+  elif command in ("create", "new"):
+    # if arguments and arguments[0] == "round":
+    #   # PROCESS DATA
+    #   if not cur_round.ranked_results:
+    #     cur_round.process_data()
+    #     cur_round.generate_rankings()
+    #     cur_round.display_results()
+    #     new_ranks = list(cur_round.ranked_results.keys()) # Get sorted list of fencer ids
+    #     print(new_ranks)
+
+    #   date = "" if len(arguments == 1) else arguments[1]
+    #   cur_round = cur_event.new_round({"date":date})
+    #   round_num = len(cur_event.rounds)
+    #   print("ROUND {round_num}")
+    #   cur_round.allocate_poules()
+    #   cur_round.display_poules()
+      
+    #   poule_num = 1
+    #   cur_poule = cur_round.poules[poule_num-1]
+      
+    #   # cur_poule.raw_data = [
+    #   #   ["X", 5, 4, 5, 2, 5],
+    #   #   [1, "X", 3, 5, 2, 3],
+    #   #   [5, 5, "X", 4, 3, 5],
+    #   #   [2, 4, 5, "X", 3, 4],
+    #   #   [5, 5, 5, 5, "X", 5],
+    #   #   [4, 5, 4, 5, 3, "X"],
+    #   # ] # debugging
+    #   cur_poule.display_raw_data() # display the raw data (scores)
+
   else:
     print("Command not recognised. Sorry!")
   

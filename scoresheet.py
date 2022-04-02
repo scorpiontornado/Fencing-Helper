@@ -122,8 +122,6 @@ class Round:
       self.num_poules = len(self.prev_ranks) // self.DEFAULT_NUM_FENCERS # auto-determine number of poules
     
     self.poules = [Poule() for _ in range(self.num_poules)] # Create empty poules
-    # print("\nEmpty self.poules:", self.poules)
-    # print("self.prev_ranks:", self.prev_ranks)
   
     index_from = 0
     index_to = 0 # Poule index_to put the fencer in
@@ -232,20 +230,10 @@ class Round:
       self.ranked_results: processed, ranked results (sorted dictionary of dictionaries). For displaying round results
       self.new_id_rankings: sorted list of fencer_ids. For creating the next round's poules.
     '''
-    # TODO: remove. Testing.
-    # print("Inside generate_rankings")
-    # print("self.unranked_results:")
-    # self.dict_print(self.unranked_results)
 
     self.id_rankings = sorted(self.unranked_results, key = lambda fid: (self.unranked_results[fid].get("v/m", 0), self.unranked_results[fid].get("ind", 0), self.unranked_results[fid].get("hg", 0)), reverse = True) # list of sorted keys (fencer_ids), sorted first by v/m, then by ind, then by hg.
     self.ranked_results = {fid:self.unranked_results[fid] for fid in self.id_rankings}
     # TODO: ties. Get the fencers to fence again, do a coin toss, or display a T after the rank, e.g. "21T"
-
-    # TODO: remove. Testing.
-    # print("self.id_rankings:")
-    # print(self.id_rankings)
-    # print("\nself.ranked_results:")
-    # self.dict_print(self.ranked_results)
 
   def dict_print(self, dict_):
     ''' Prints a dictionary in a nicer way. Used in display_results and debugging. '''
@@ -286,7 +274,7 @@ class Event:
     
   Methods:
     + generate_id()
-    + new_round(metadata, [id_rankings])
+    + Round: new_round(metadata, [id_rankings])
     + Fencer: get_fencer_by_id(fencer_id)
   '''
     
@@ -317,11 +305,16 @@ class Event:
   def new_round(self, metadata, id_rankings=[]):
     '''
     Appends a new round to self.rounds
+    
     Inputs: metadata (dict with key "date"), [id_rankings]
     id_rankings overrides the existing rankings from the previous round, e.g. if a fencer is sick for that round
+    
+    Output: round object that was just created
     '''
     if id_rankings: self.id_rankings = id_rankings # override the current id rankings stored in the event if passed in a new set of id rankings
     self.rounds.append(Round(self, metadata, self.id_rankings)) # create a new round
+
+    return self.rounds[-1]
 
   def get_fencer_by_id(self, fencer_id):
     ''' Returns the fencer object associated with the given fencer_id '''
