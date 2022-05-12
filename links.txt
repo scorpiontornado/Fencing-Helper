@@ -32,3 +32,5 @@ https://towardsdatascience.com/sorting-a-dictionary-in-python-4280451e1637#:~:te
 https://stackoverflow.com/questions/1915564/python-convert-a-dictionary-to-a-sorted-list-by-value-instead-of-key
 https://towardsdatascience.com/sorting-a-dictionary-in-python-4280451e1637#:~:text=The%20sorted()%20function%20can,%2C%20the%20key%2C%20and%20reverse.&text=In%20contrast%20to%20the%20sort,tuples%2C%20dictionaries%2C%20and%20others.
 https://stackoverflow.com/questions/39980323/are-dictionaries-ordered-in-python-3-6#:~:text=Dictionaries%20are%20ordered%20in%20Python,least)%20unlike%20in%20previous%20incarnations.
+
+https://stackoverflow.com/questions/610883/how-to-know-if-an-object-has-an-attribute-in-python

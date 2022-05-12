@@ -67,17 +67,19 @@ def process(arguments, cur_round):
   cur_round.display_results()
   # print(cur_round.unranked_results) # for testing
 
-def create(arguments, cur_round):
+def create(arguments, cur_round, round_num, cur_poule, poule_num):
   if len(arguments) != 1:
     print("Invalid number of arguments")
   
-  if arguments and arguments[0] == "round":
+  elif arguments and arguments[0] == "round":
     # PROCESS DATA (if not already done)
     if not hasattr(cur_round, "ranked_results"):
       cur_round.process_data()
       cur_round.generate_rankings()
     id_rankings = list(cur_round.ranked_results.keys()) # Get sorted list of fencer ids
-    print(id_rankings)
+    #print(id_rankings)
+    print(f"\n ######### RESULTS FOR CURRENT ROUND #########")
+    cur_round.display_results()
 
     date = "" if len(arguments) == 1 else arguments[1] # TODO: auto-set date
     
@@ -90,21 +92,21 @@ def create(arguments, cur_round):
     
     poule_num = 1
     cur_poule = cur_round.poules[0]
-    
-    return cur_round, round_num, cur_poule, poule_num
   
   else:
     print("Invalid argument")
 
+  return cur_round, round_num, cur_poule, poule_num
+
 ### INITIALISE DUMMY EVENT ###
-years = {}
+years = {} # The highest-level data structure.
 
 # TODO: create an input system (maybe from a file?) to automatically add events like "2022 Jan-Mar U14 epee individual event"
-# TODO: create a backup system so that event data isn't lost on program restart
+# TODO: create a backup system so that event data isn't lost on program restart - pickle
 
 years["2022"] = [scoresheet.Event({"months": "Jan-Mar", "school_years": "10-12", "weapon": "epee", "type": "individual"}, "name_rankings.txt")]
 
-cur_event = years["2022"][0]
+cur_event = years["2022"][-1]
 
 for fencer in cur_event.fencers:
   print(fencer)
@@ -148,7 +150,7 @@ while user_input:
     process(arguments, cur_round)
 
   elif command in ("create", "new"):
-    cur_round, round_num, cur_poule, poule_num = create(arguments, cur_round)
+    cur_round, round_num, cur_poule, poule_num = create(arguments, cur_round, round_num, cur_poule, poule_num)
   
   else:
     print("Command not recognised. Sorry!")
