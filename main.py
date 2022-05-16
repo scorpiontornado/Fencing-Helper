@@ -1,6 +1,7 @@
 # For the moment, all setup and input happens here. I might modularise/abstract this later.
-import scoresheet
-import re
+import scoresheet # custom classes made by candidate
+import re # regex
+import pickle # serialisation and de-serialisation
 
 ### COMMANDS ###
 def help(arguments):
@@ -17,34 +18,32 @@ def help(arguments):
   else:
     print("Command not recognised. Sorry!")
 
-def swap(arguments, cur_event, cur_round, round_num, cur_poule, poule_num):
+def swap(arguments, current):
   if len(arguments) != 2:
     print("Invalid number of arguments")
     
-  elif arguments[0] in ("poule", "poules") and int(arguments[1]) >= 1 and int(arguments[1]) <= len(cur_round.poules):
-    poule_num = int(arguments[1])
-    cur_poule = cur_round.poules[poule_num-1]
+  elif arguments[0] in ("poule", "poules") and int(arguments[1]) >= 1 and int(arguments[1]) <= len(current["round"].poules):
+    current["poule_num"] = int(arguments[1])
+    current["poule"] = current["round"].poules[current["poule_num"]-1]
 
-    print(f"\n ######### ROUND {round_num} #########")
-    cur_round.display_poules(poule_num)  
-    cur_poule.display_raw_data() # display the raw data (scores)
+    print(f"\n ######### ROUND {current['round_num']} #########")
+    current["round"].display_poules(current["poule_num"])  
+    current["poule"].display_raw_data() # display the raw data (scores)
     
-  elif arguments[0] in ("round", "rounds") and int(arguments[1]) >= 1 and int(arguments[1]) <= len(cur_event.rounds):
-    round_num = int(arguments[1])
-    cur_round = cur_event.rounds[round_num-1]
+  elif arguments[0] in ("round", "rounds") and int(arguments[1]) >= 1 and int(arguments[1]) <= len(current["event"].rounds):
+    current["round_num"] = int(arguments[1])
+    current["round"] = current["event"].rounds[current["round_num"]-1]
 
-    poule_num = 1
-    cur_poule = cur_round.poules[0]
+    current["poule_num"] = 1
+    current["poule"] = current["round"].poules[0]
 
-    print(f"\n ######### ROUND {round_num} #########")
-    cur_round.display_poules()
+    print(f"\n ######### ROUND {current['round_num']} #########")
+    current["round"].display_poules()
     
   else:
     print("Invalid argument(s)")
 
-  return cur_round, round_num, cur_poule, poule_num
-
-def score(arguments, cur_poule):
+def score(arguments, current):
   if len(arguments) == 4:
     fencer_id1, score1, fencer_id2, score2 = arguments # set variables
     # TODO: a way to do this that is easier for the user than having to use fencer_ids. Maybe indexes?
@@ -55,104 +54,135 @@ def score(arguments, cur_poule):
     score2 = int(re.sub(r"\D+", "", score2)) # \D matches any non-digit character
     print("score1:", score1, score2)
 
-    cur_poule.input_scores(fencer_id1, score1, fencer_id2, score2) # input the scores
-    cur_poule.display_raw_data() # display the raw data (scores)
+    current["poule"].input_scores(fencer_id1, score1, fencer_id2, score2) # input the scores
+    current["poule"].display_raw_data() # display the raw data (scores)
 
   else:
     print("Invalid number of arugments.")
 
-def process(arguments, cur_round):
-  cur_round.process_data()
-  cur_round.generate_rankings()
-  cur_round.display_results()
-  # print(cur_round.unranked_results) # for testing
+def process(arguments, current):
+  current["round"].process_data()
+  current["round"].generate_rankings()
+  current["round"].display_results()
+  # print(current["round"].unranked_results) # for testing
 
-def create(arguments, cur_round, round_num, cur_poule, poule_num):
+def create(arguments, current):
   if len(arguments) != 1:
     print("Invalid number of arguments")
   
   elif arguments and arguments[0] == "round":
     # PROCESS DATA (if not already done)
-    if not hasattr(cur_round, "ranked_results"):
-      cur_round.process_data()
-      cur_round.generate_rankings()
-    id_rankings = list(cur_round.ranked_results.keys()) # Get sorted list of fencer ids
+    if not hasattr(current["round"], "ranked_results"):
+      current["round"].process_data()
+      current["round"].generate_rankings()
+    id_rankings = list(current["round"].ranked_results.keys()) # Get sorted list of fencer ids
     #print(id_rankings)
     print(f"\n ######### RESULTS FOR CURRENT ROUND #########")
-    cur_round.display_results()
+    current["round"].display_results()
 
     date = "" if len(arguments) == 1 else arguments[1] # TODO: auto-set date
     
-    cur_round = cur_event.new_round({"date":date}, id_rankings = id_rankings)
-    round_num = len(cur_event.rounds)
+    current["round"] = current["event"].new_round({"date":date}, id_rankings = id_rankings)
+    current["round_num"] = len(current["event"].rounds)
     
-    cur_round.allocate_poules()
-    print(f"\n ######### ROUND {round_num} #########")
-    cur_round.display_poules()
+    current["round"].allocate_poules()
+    print(f"\n ######### ROUND {current['round_num']} #########")
+    current["round"].display_poules()
     
-    poule_num = 1
-    cur_poule = cur_round.poules[0]
+    current["poule_num"] = 1
+    current["poule"] = current["round"].poules[0]
   
   else:
     print("Invalid argument")
 
-  return cur_round, round_num, cur_poule, poule_num
+# Attempt to de-serialse & load years from "years.pickle"
+try:
+  with open("years.pickle", "rb") as file:
+    # YEARS is a dictionary (hash-map object that stores key-value pairs) with String keys corresponding to years
+    # e.g. "2022", and values of arrays of Event objects. "name_rankings.txt" contains initial fencer rankings.
+    years = pickle.load(file) # de-serialise & load data contained in file "years.pickle" and assign to years # TODO: change from years_load_test
+    print("Successfully loaded years.pickle")
+    
+except FileNotFoundError:
+  print("years.pickle not found, initialising years manually")
+  # TODO: create an input system (maybe from a file?) to automatically add events like "2022 Jan-Mar U14 epee individual event"
+  
+  ### INITIALISE DUMMY EVENT ###
+  years = {} # The highest-level data structure.
+  years["2022"] = [scoresheet.Event({"months": "Jan-Mar", "school_years": "10-12", "weapon": "epee", "type": "individual"}, "name_rankings.txt")]
+  
+  # Create dictionary CURRENT that stores the current event, round, and poule, and the (1-indexed) index of the
+  # current round and poule for outputting purposes (current system is 1-indexed -> more understandable for users)
+  current = {
+    "event": years["2022"][-1]
+  }
+  
+  # Create new instance of Round object and assign to CURRENT["ROUND"]
+  current["round"] = current["event"].new_round({"date":"20220111"})
+  current["round_num"] = 1
+  
+  # Automatically allocate poules based on initial rankings in name_rankings.txt
+  current["round"].allocate_poules()
+  
+  # Set the first poule to be the current poule in CURRENT
+  current["poule"] = current["round"].poules[0]
+  current["poule_num"] = 1
+  
+  current["poule"].raw_data = [
+    ["X", 5, 4, 5, 2, 5],
+    [1, "X", 3, 5, 2, 3],
+    [5, 5, "X", 4, 3, 5],
+    [2, 4, 5, "X", 3, 4],
+    [5, 5, 5, 5, "X", 5],
+    [4, 5, 4, 5, 3, "X"],
+  ] # debugging
 
-### INITIALISE DUMMY EVENT ###
-years = {} # The highest-level data structure.
-
-# TODO: create an input system (maybe from a file?) to automatically add events like "2022 Jan-Mar U14 epee individual event"
-# TODO: create a backup system so that event data isn't lost on program restart - pickle
-
-years["2022"] = [scoresheet.Event({"months": "Jan-Mar", "school_years": "10-12", "weapon": "epee", "type": "individual"}, "name_rankings.txt")]
-
-cur_event = years["2022"][-1]
-
-for fencer in cur_event.fencers:
+# Output the fencers in the current event to allow coaches to ensure no inputting errors have been made
+for fencer in current["event"].fencers:
   print(fencer)
 
-cur_round = cur_event.new_round({"date":"20220111"})
-round_num = 1
-cur_round.allocate_poules()
-print(f"\n ######### ROUND {round_num} #########")
-cur_round.display_poules()
+# Output the poule lists (showing which fencers are in which poules) for the current round
+print(f"\n ######### ROUND {current['round_num']} #########")
+current["round"].display_poules()
 
-cur_poule = cur_round.poules[0]
-poule_num = 1
+# Output the raw data (scores) for the current poule
+current["poule"].display_raw_data()
 
-cur_poule.raw_data = [
-  ["X", 5, 4, 5, 2, 5],
-  [1, "X", 3, 5, 2, 3],
-  [5, 5, "X", 4, 3, 5],
-  [2, 4, 5, "X", 3, 4],
-  [5, 5, 5, 5, "X", 5],
-  [4, 5, 4, 5, 3, "X"],
-] # debugging
-cur_poule.display_raw_data() # display the raw data (scores)
+with open("years.pickle", "wb") as file:
+  ### UI ###
+  user_input = input("\n\nWhat would you like to do? (You can always type 'help'!) ")
+  while user_input:
+    user_input = user_input.split()
+    command = user_input[0].lower()
+    arguments = user_input[1:]
+    
+    if command == "help":
+      help(arguments)
+    
+    elif command in ("swap, switch"):
+      swap(arguments, current)
+    
+    elif command in ("score", "scores"):
+      score(arguments, current)
+        
+    elif command in ("process", "rankings", "results"):
+      process(arguments, current)
+  
+    elif command in ("create", "new"):
+      create(arguments, current)
+    
+    else:
+      print("Command not recognised. Sorry!")
+  
+    # Serialise object and store in "years.pickle"
+    pickle.dump(years, file, protocol=pickle.HIGHEST_PROTOCOL)
+    
+    user_input = input("\nWhat would you like to do? ")
 
-### UI ###
-user_input = input("\n\nWhat would you like to do? (You can always type 'help'!) ")
-while user_input:
-  user_input = user_input.split()
-  command = user_input[0].lower()
-  arguments = user_input[1:]
-  
-  if command == "help":
-    help(arguments)
-  
-  elif command in ("swap, switch"):
-    cur_round, round_num, cur_poule, poule_num = swap(arguments, cur_event, cur_round, round_num, cur_poule, poule_num)
-  
-  elif command in ("score", "scores"):
-    score(arguments, cur_poule)
-      
-  elif command in ("process", "rankings", "results"):
-    process(arguments, cur_round)
-
-  elif command in ("create", "new"):
-    cur_round, round_num, cur_poule, poule_num = create(arguments, cur_round, round_num, cur_poule, poule_num)
-  
-  else:
-    print("Command not recognised. Sorry!")
-  
-  user_input = input("\nWhat would you like to do? ")
+# TODO: delete. debugging
+with open("years.pickle", "rb") as file:
+  # YEARS is a dictionary (hash-map object that stores key-value pairs) with String keys corresponding to years
+  # e.g. "2022", and values of arrays of Event objects. "name_rankings.txt" contains initial fencer rankings.
+  years_load_test = pickle.load(file) # de-serialise & load data contained in file "years.pickle" and assign to years # TODO: change from years_load_test
+  print("Successfully loaded years.pickle 2")
+print(years == years_load_test)
