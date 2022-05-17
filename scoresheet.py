@@ -255,19 +255,34 @@ class Fencer:
 
   Attributes:
     + fencer_id:String ("ID" + >=3 digit integer, e.g. "ID025")
-    + name:String
+    + first_name:String
+    + surname:String
+    + year_group:String
   Methods:
     + __str__()
   '''
 
   def __init__(self, name, fencer_id):
     ''' Initiate variables '''
+    # TODO: implement year_group
+    
     self.fencer_id = fencer_id
-    self.name = name
+
+    name = name.split()
+    
+    if len(name) == 1:
+      self.first_name = name[0] # set first_name to name and leave surname blank
+      self.surname = ""
+    elif len(name) > 1:
+      self.first_name = name[0] # extract the first name
+      self.surname = name[-1] # extract the surname
+    else:
+      self.first_name = "Unnamed" # if length of name blank, set to "Unnamed Fencer"
+      self.surname = "Fencer"
 
   def __str__(self):
     ''' Returns fencer's name and id (justified into columns for readability) when __str__, print(), or str() are called on the object'''
-    return '{0.name:<24} {0.fencer_id:<10}'.format(self) # left-justify name and right-justify fencer_id
+    return '{0:<24} {1:<10}'.format(self.first_name + " " + self.surname, self.fencer_id) # left-justify name and right-justify fencer_id
     
 class Event:
   '''
@@ -276,6 +291,7 @@ class Event:
   Each object represents a single event, such as "years 10-12" or "epee teams event" for "U14", stored within a dictionary of years. 
 
   Attributes:
+    + start_date:String
     + event_data:dict of Strings 
     + fencers:Fencer[]
     + rounds:Round[]
@@ -330,3 +346,34 @@ class Event:
     # Linear search
     for fencer in self.fencers:
       if fencer.fencer_id == fencer_id: return fencer
+
+class League:
+  '''
+  League: a group of multiple Events. Also, League has an attribute "current", a dictionary which stores the current event, round, and poule, and the (1-indexed) index of the current round and poule for outputting purposes (the current system is 1-indexed, so its more understandable for users)
+  
+  There will only be one instance of the League class at one time within the mainline (main.py), "league". This instance of the league object is regularly serialised to "league.pickle" in order to enable persistence. Then, when the program is terminated and run once more, the "league" object will be de-serialised from "league.pickle".
+
+  Attributes:
+    + events:Event[]
+    + current:dict
+    
+  Methods:
+    + new_event(metadata):Event
+  '''
+    
+  def __init__(self):
+    self.events = []
+    self.current = {} # TODO: remove?
+
+  def new_event(self, event_data, rankings_file):
+    # TODO: new_event or add_event?
+    '''
+    Appends a new event to self.events (and set current["event"] to this new event). If this is the first event to be added, will initialise current.
+    
+    Inputs: event_data (dict with keys ("school_years" or "age_bracket"), "weapon", and "type" (individual or group)), rankings_file (file containing names of fencers ordered by initial rankings)
+    
+    Output: round object that was just created
+    '''
+    self.events.append(Event(event_data, rankings_file))
+    self.current = {"event": self.events[-1]} # update the current event
+    # TODO: decide how to update self.current when a new round etc is added. Do I just have to do this from outside the function?

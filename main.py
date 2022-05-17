@@ -42,6 +42,8 @@ def swap(arguments, current):
     
   else:
     print("Invalid argument(s)")
+  
+  # return current # unecessary (will modify original copy, as it is pass-by-reference)
 
 def score(arguments, current):
   if len(arguments) == 4:
@@ -95,40 +97,37 @@ def create(arguments, current):
   else:
     print("Invalid argument")
 
+    # return current # unecessary (will modify original copy, as it is pass-by-reference)
+
 # Attempt to de-serialse & load years from "years.pickle"
 try:
-  with open("years.pickle", "rb") as file:
-    # YEARS is a dictionary (hash-map object that stores key-value pairs) with String keys corresponding to years
-    # e.g. "2022", and values of arrays of Event objects. "name_rankings.txt" contains initial fencer rankings.
-    years = pickle.load(file) # de-serialise & load data contained in file "years.pickle" and assign to years # TODO: change from years_load_test
-    print("Successfully loaded years.pickle")
+  with open("league.pickle", "rb") as file:
+    # TODO: write description of years, similar to the one I did for the (now deprecated) years
+    league = pickle.load(file) # de-serialise & load data contained in file "league.pickle" and assign to league
+    print("Successfully loaded league.pickle")
+    print(league.current["poule_num"])
     
-except FileNotFoundError:
-  print("years.pickle not found, initialising years manually")
+except (FileNotFoundError, EOFError):
+  print("league.pickle not found, initialising league manually")
   # TODO: create an input system (maybe from a file?) to automatically add events like "2022 Jan-Mar U14 epee individual event"
   
-  ### INITIALISE DUMMY EVENT ###
-  years = {} # The highest-level data structure.
-  years["2022"] = [scoresheet.Event({"months": "Jan-Mar", "school_years": "10-12", "weapon": "epee", "type": "individual"}, "name_rankings.txt")]
+  ### INITIALISE DUMMY LEAGUE & EVENT ###
+  league = scoresheet.League() # the highest-level data structure.
+  league.new_event({"months": "Jan-Mar", "school_years": "10-12", "weapon": "epee", "type": "individual"}, "name_rankings.txt")
   
-  # Create dictionary CURRENT that stores the current event, round, and poule, and the (1-indexed) index of the
-  # current round and poule for outputting purposes (current system is 1-indexed -> more understandable for users)
-  current = {
-    "event": years["2022"][-1]
-  }
-  
-  # Create new instance of Round object and assign to CURRENT["ROUND"]
-  current["round"] = current["event"].new_round({"date":"20220111"})
-  current["round_num"] = 1
+  # Create new instance of Round object and assign to league.current["round"]
+  league.current["round"] = league.current["event"].new_round({"date":"20220111"})
+  league.current["round_num"] = 1
   
   # Automatically allocate poules based on initial rankings in name_rankings.txt
-  current["round"].allocate_poules()
+  league.current["round"].allocate_poules()
   
   # Set the first poule to be the current poule in CURRENT
-  current["poule"] = current["round"].poules[0]
-  current["poule_num"] = 1
+  league.current["poule"] = league.current["round"].poules[0]
+  league.current["poule_num"] = 1
   
-  current["poule"].raw_data = [
+  # Insert dummy data. TODO: make it possible to do this via a file.
+  league.current["poule"].raw_data = [
     ["X", 5, 4, 5, 2, 5],
     [1, "X", 3, 5, 2, 3],
     [5, 5, "X", 4, 3, 5],
@@ -138,17 +137,17 @@ except FileNotFoundError:
   ] # debugging
 
 # Output the fencers in the current event to allow coaches to ensure no inputting errors have been made
-for fencer in current["event"].fencers:
+for fencer in league.current["event"].fencers:
   print(fencer)
 
 # Output the poule lists (showing which fencers are in which poules) for the current round
-print(f"\n ######### ROUND {current['round_num']} #########")
-current["round"].display_poules()
+print(f"\n ######### ROUND {league.current['round_num']} #########")
+league.current["round"].display_poules()
 
 # Output the raw data (scores) for the current poule
-current["poule"].display_raw_data()
+league.current["poule"].display_raw_data()
 
-with open("years.pickle", "wb") as file:
+with open("league.pickle", "wb") as file:
   ### UI ###
   user_input = input("\n\nWhat would you like to do? (You can always type 'help'!) ")
   while user_input:
@@ -160,29 +159,31 @@ with open("years.pickle", "wb") as file:
       help(arguments)
     
     elif command in ("swap, switch"):
-      swap(arguments, current)
+      swap(arguments, league.current)
     
     elif command in ("score", "scores"):
-      score(arguments, current)
+      score(arguments, league.current)
         
     elif command in ("process", "rankings", "results"):
-      process(arguments, current)
+      process(arguments, league.current)
   
     elif command in ("create", "new"):
-      create(arguments, current)
+      league.current = create(arguments, league.current)
     
     else:
       print("Command not recognised. Sorry!")
   
     # Serialise object and store in "years.pickle"
-    pickle.dump(years, file, protocol=pickle.HIGHEST_PROTOCOL)
+    pickle.dump(league, file, protocol=pickle.HIGHEST_PROTOCOL)
+    print("\nDumped league to pickle\n")
     
     user_input = input("\nWhat would you like to do? ")
+    
+  # Store data before exiting 
+  pickle.dump(league, file, protocol=pickle.HIGHEST_PROTOCOL)
+  print("\nDumped league to pickle\n")
 
-# TODO: delete. debugging
-with open("years.pickle", "rb") as file:
-  # YEARS is a dictionary (hash-map object that stores key-value pairs) with String keys corresponding to years
-  # e.g. "2022", and values of arrays of Event objects. "name_rankings.txt" contains initial fencer rankings.
-  years_load_test = pickle.load(file) # de-serialise & load data contained in file "years.pickle" and assign to years # TODO: change from years_load_test
-  print("Successfully loaded years.pickle 2")
-print(years == years_load_test)
+# # TODO: delete. debugging
+# with open("league.pickle", "rb") as file:
+#   league_load_test = pickle.load(file) # de-serialise & load data contained in file "years.pickle" and assign to years # TODO: change from years_load_test
+# print(league == league_load_test)
