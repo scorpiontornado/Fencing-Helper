@@ -32,8 +32,6 @@ poule.raw_data = [
 ] # debugging
 poule.display_raw_data() # display the raw data (scores)
 
-
-# TODO: command to create new round
 user_input = input("\n\nWhat would you like to do? (You can always type 'help'!) ")
 while user_input:
   user_input = user_input.split()
