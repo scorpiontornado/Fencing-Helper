@@ -147,43 +147,36 @@ league.current["round"].display_poules()
 # Output the raw data (scores) for the current poule
 league.current["poule"].display_raw_data()
 
-with open("league.pickle", "wb") as file:
-  ### UI ###
-  user_input = input("\n\nWhat would you like to do? (You can always type 'help'!) ")
-  while user_input:
-    user_input = user_input.split()
-    command = user_input[0].lower()
-    arguments = user_input[1:]
-    
-    if command == "help":
-      help(arguments)
-    
-    elif command in ("swap, switch"):
-      swap(arguments, league.current)
-    
-    elif command in ("score", "scores"):
-      score(arguments, league.current)
-        
-    elif command in ("process", "rankings", "results"):
-      process(arguments, league.current)
+# TODO: this overrites the file, so if you start and stop without inputting anything, it will lose all data.
+
+### UI ###
+user_input = input("\n\nWhat would you like to do? (You can always type 'help'!) ")
+while user_input:
+  user_input = user_input.split()
+  command = user_input[0].lower()
+  arguments = user_input[1:]
   
-    elif command in ("create", "new"):
-      league.current = create(arguments, league.current)
-    
-    else:
-      print("Command not recognised. Sorry!")
+  if command == "help":
+    help(arguments)
   
-    # Serialise object and store in "years.pickle"
+  elif command in ("swap, switch"):
+    swap(arguments, league.current)
+  
+  elif command in ("score", "scores"):
+    score(arguments, league.current)
+      
+  elif command in ("process", "rankings", "results"):
+    process(arguments, league.current)
+
+  elif command in ("create", "new"):
+    league.current = create(arguments, league.current)
+  
+  else:
+    print("Command not recognised. Sorry!")
+
+  # Serialise object and store in "years.pickle"
+  with open("league.pickle", "wb") as file:
     pickle.dump(league, file, protocol=pickle.HIGHEST_PROTOCOL)
     print("\nDumped league to pickle\n")
-    
-    user_input = input("\nWhat would you like to do? ")
-    
-  # Store data before exiting 
-  pickle.dump(league, file, protocol=pickle.HIGHEST_PROTOCOL)
-  print("\nDumped league to pickle\n")
-
-# # TODO: delete. debugging
-# with open("league.pickle", "rb") as file:
-#   league_load_test = pickle.load(file) # de-serialise & load data contained in file "years.pickle" and assign to years # TODO: change from years_load_test
-# print(league == league_load_test)
+  
+  user_input = input("\nWhat would you like to do? ")
