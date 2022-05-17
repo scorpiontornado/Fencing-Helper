@@ -5,6 +5,7 @@ years = {
   "2019": events = [
     Event object
       event_data = { # Will be used to construct a string like "U14 epee individual event"
+        start_date: "20220517"
         school_years: "10-12",  # One of the two:
         age_bracket: "U14",     # Either school_years for SACS, or age_bracket for interschool
         weapon: "epee",

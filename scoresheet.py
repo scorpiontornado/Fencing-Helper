@@ -9,13 +9,14 @@ class Poule:
   (All non-numerical digits are ignored in the 3rd and 5th "words")
 
   Attributes:
-    + fencer_id[]: fencer_ids (keys - parallel to the rows/columns, used to find which fencer is at which row/column)
-    + String[][]: raw_data (user input into scorecard). Rows signify the hits scored by the fencer against the people in the columns. E.g. using raw_data[row][column], raw_data[0][1] would be the number of times the fencer in index 0 hit the fencer in index 1. The main diagonal should remain empty.
+    + fencer_ids:String[] (array of fencer ids, i.e. "keys" - parallel to the rows/columns, used to find which fencer is at which row/column)
+    + raw_data:String[][] (user input into scorecard). Rows signify the hits scored by the fencer against the people in the columns. E.g. using raw_data[row][column], raw_data[0][1] would be the number of times the fencer in index 0 hit the fencer in index 1. The main diagonal should remain empty.
 
   Methods:
     + init_raw_data()
     + get_index(fencer_id)
     + input_scores(fencer_id1, score1, fencer_id2, score2)
+    + display_raw_data()
   '''
   def __init__(self):
     self.fencer_ids = [] # todo: some sort of failsafe if 0 fencers?
@@ -30,14 +31,16 @@ class Poule:
       self.raw_data[i][i] = "X"
 
   def get_index(self, fencer_id):
-    ''' Returns the index associated with the given fencer_id '''
+    '''
+    Returns the index associated with the given fencer_id
+    '''
     # Linear search
     for i, cur_id in enumerate(self.fencer_ids):
       if cur_id == fencer_id: return i
 
   def input_scores(self, fencer_id1, score1, fencer_id2, score2):
     '''
-    Input the results of a bout / the scores of two fencers
+    Inputs the results of a bout / the scores of two fencers
     '''
     # TODO: should I allow index input instead of fencer ids?
     
@@ -56,7 +59,7 @@ class Poule:
 
   def display_raw_data(self):
     '''
-    WIP. Print the raw data to the screen.
+    WIP. Prints the raw data to the screen in a grid format.
     '''
     # Should this be called display_scores?
     #print(self.raw_data) # TODO: better print function
@@ -70,16 +73,17 @@ class Round:
   Essentially one "week" of an event, consisting of poules (groups of fencers). Assigns fencer (ids) to poules based on rankings, analyses the raw data from a poule
   
   Attributes:
-    + dict: metadata (contains dates the round occured over)
-    + fencer_id[]: prev_ranks (rankings from the previous round, sorted in desc. order, best to worst)
-    + fencer_id[]: new_ranks (rankings generated from this round, sorted in desc. order, best to worst)
-    + dict: processed_data (contains wins (w), losses (l), hits gained (hg), hits received (hr), and indicator (ind; hg - hr) for each fencer)
-    + int: num_poules (ideally enough to ensure 6 or 7 fencers are in each poule)
-    + Poule[]: poules
+    + metadata:dict
+    + prev_id_ranks:String[]
+    + num_poules:int
+    + poules:Poule[]
+    + unranked_results:dict
+    + ranked_results:dict
+    + new_id_ranks:String[]
   
   Methods:
-    + allocate_poules() (Allocates fencers into poules based on their rankings from the previous round)
-    + display_poules([poule_num]) (poule_num can be "all" (default) or any integer >= 0 and < self.num_poules)
+    + allocate_poules(num_poules=None) (Allocates fencers into poules based on their rankings from the previous round)
+    + display_poules(poule_num="all") (poule_num can be "all" (default) or any integer >= 0 and < self.num_poules)
     + process_data() (Extracts and calculates data (w, l, hg, hr, ind) for each fencer)
     + generate_rankings() (Ranks fencers in desc. order based on data from process_data)
     - dict_print(dict_) (Prints a given dictionary. Used in display_results)
@@ -88,12 +92,12 @@ class Round:
   # possibly TODO: make consistent. Rankings or results?
   '''
   # TODO: Should fencers be here or in year? Should be easy enough to change, just pass in fencers to input. But, do I want changes to fencers here to affect fencers globally?
-  def __init__(self, parent, metadata, prev_ranks):
+  def __init__(self, parent, metadata, prev_id_ranks):
     ''' Input: metadata (dict with key "date"), rankings (list of fencers, sorted in desc. order (i.e. best to worst), from the previous round) '''
     self.parent = parent # Parent (Event) object
     
     self.metadata = metadata # TODO: should the date key be a string YYYYMMDD, DDMMYYYY, or a datetime object?
-    self.prev_ranks = prev_ranks
+    self.prev_id_ranks = prev_id_ranks
 
   def allocate_poules(self, num_poules=None):
     '''
@@ -102,7 +106,7 @@ class Round:
     For example, when inputted 12 fencers, it will place them in poules like so (where each sub-list is a poule, and each number is the fencer's rank):
       [[1, 10, 11], [2, 9, 12], [3, 8], [4, 7], [5, 6]]
 
-    Input: [num_poules] (must be an int, > 0 and <= len(self.prev_ranks))
+    Input: [num_poules] (must be an int, > 0 and <= len(self.prev_id_ranks))
     '''
 
     # TODO: determine num_poules automatically, but have some sort of override
@@ -116,22 +120,20 @@ class Round:
     if (num_poules
         and isinstance(num_poules, int)
         and num_poules > 0
-        and num_poules <= len(self.prev_ranks)):
+        and num_poules <= len(self.prev_id_ranks)):
           self.num_poules = num_poules # assign the number of poules manually
     else:
-      self.num_poules = len(self.prev_ranks) // self.DEFAULT_NUM_FENCERS # auto-determine number of poules
+      self.num_poules = len(self.prev_id_ranks) // self.DEFAULT_NUM_FENCERS # auto-determine number of poules
     
     self.poules = [Poule() for _ in range(self.num_poules)] # Create empty poules
-    # print("\nEmpty self.poules:", self.poules)
-    # print("self.prev_ranks:", self.prev_ranks)
   
     index_from = 0
     index_to = 0 # Poule index_to put the fencer in
     direction = 1 # +1 for forwards, -1 for backwards. The number index_to is incremented by.
   
-    while index_from < len(self.prev_ranks):
+    while index_from < len(self.prev_id_ranks):
       # 1. Assign fencer to poule
-      self.poules[index_to].fencer_ids.append(self.prev_ranks[index_from])
+      self.poules[index_to].fencer_ids.append(self.prev_id_ranks[index_from])
   
       # 2. Increment index_from by 1
       index_from += 1
@@ -228,24 +230,16 @@ class Round:
 
   def generate_rankings(self):
     '''
+    Sorting priority: v/m, ind, hg
+    
     Creates two properties using self.unranked_results (from self.process_data()):
       self.ranked_results: processed, ranked results (sorted dictionary of dictionaries). For displaying round results
-      self.new_id_rankings: sorted list of fencer_ids. For creating the next round's poules.
+      self.new_id_ranks: sorted list of fencer_ids. For creating the next round's poules.
     '''
-    # TODO: remove. Testing.
-    # print("Inside generate_rankings")
-    # print("self.unranked_results:")
-    # self.dict_print(self.unranked_results)
 
-    self.id_rankings = sorted(self.unranked_results, key = lambda fid: (self.unranked_results[fid].get("v/m", 0), self.unranked_results[fid].get("ind", 0), self.unranked_results[fid].get("hg", 0)), reverse = True) # list of sorted keys (fencer_ids), sorted first by v/m, then by ind, then by hg.
-    self.ranked_results = {fid:self.unranked_results[fid] for fid in self.id_rankings}
+    self.new_id_ranks = sorted(self.unranked_results, key = lambda fid: (self.unranked_results[fid].get("v/m", 0), self.unranked_results[fid].get("ind", 0), self.unranked_results[fid].get("hg", 0)), reverse = True) # list of sorted keys (fencer_ids), sorted first by v/m, then by ind, then by hg.
+    self.ranked_results = {fid:self.unranked_results[fid] for fid in self.new_id_ranks}
     # TODO: ties. Get the fencers to fence again, do a coin toss, or display a T after the rank, e.g. "21T"
-
-    # TODO: remove. Testing.
-    # print("self.id_rankings:")
-    # print(self.id_rankings)
-    # print("\nself.ranked_results:")
-    # self.dict_print(self.ranked_results)
 
   def dict_print(self, dict_):
     ''' Prints a dictionary in a nicer way. Used in display_results and debugging. '''
@@ -262,32 +256,52 @@ class Fencer:
   A single fencer, containing data for the current round only
 
   Attributes:
-    + String: fencer_id ("ID" + integer, e.g. "ID25")
-    + String: name
+    + fencer_id:String ("ID" + >=3 digit integer, e.g. "ID025")
+    + first_name:String
+    + surname:String
+    + year_group:String
+  Methods:
+    + __str__()
   '''
 
   def __init__(self, name, fencer_id):
     ''' Initiate variables '''
+    # TODO: implement year_group
+    
     self.fencer_id = fencer_id
-    self.name = name
+
+    name = name.split()
+    
+    if len(name) == 1:
+      self.first_name = name[0] # set first_name to name and leave surname blank
+      self.surname = ""
+    elif len(name) > 1:
+      self.first_name = name[0] # extract the first name
+      self.surname = name[-1] # extract the surname
+    else:
+      self.first_name = "Unnamed" # if length of name blank, set to "Unnamed Fencer"
+      self.surname = "Fencer"
 
   def __str__(self):
     ''' Returns fencer's name and id (justified into columns for readability) when __str__, print(), or str() are called on the object'''
-    return '{0.name:<24} {0.fencer_id:<10}'.format(self) # left-justify name and right-justify fencer_id
+    return '{0:<24} {1:<10}'.format(self.first_name + " " + self.surname, self.fencer_id) # left-justify name and right-justify fencer_id
     
 class Event:
   '''
-  A single event, such as "years 10-12" or "epee teams event" for "U14", stored within a dictionary of years. 
+  Event: a competition for a specific weapon and age category consisting of several “seeding” rounds (used to determine initial rankings that are used to organise fencers in a direct elimination tableau) followed by “direct elimination” rounds (used to determine the final placings – see “direct elimination tableau”). 
+  
+  Each object represents a single event, such as "years 10-12" or "epee teams event" for "U14", stored within a dictionary of years. 
 
   Attributes:
-    + dict of Strings: event_data
-    + Fencer[]: fencers
-    + Round[]: rounds
+    + start_date:String
+    + event_data:dict of Strings 
+    + fencers:Fencer[]
+    + rounds:Round[]
     
   Methods:
     + generate_id()
-    + new_round(metadata, [id_rankings])
-    + Fencer: get_fencer_by_id(fencer_id)
+    + new_round(metadata, id_rankings=[]):Round
+    + get_fencer_by_id(fencer_id):Fencer
   '''
     
   def __init__(self, event_data, rankings_file):
@@ -317,14 +331,51 @@ class Event:
   def new_round(self, metadata, id_rankings=[]):
     '''
     Appends a new round to self.rounds
+    
     Inputs: metadata (dict with key "date"), [id_rankings]
     id_rankings overrides the existing rankings from the previous round, e.g. if a fencer is sick for that round
+    
+    Output: round object that was just created
     '''
     if id_rankings: self.id_rankings = id_rankings # override the current id rankings stored in the event if passed in a new set of id rankings
+    print("self.id_rankings:", self.id_rankings)
     self.rounds.append(Round(self, metadata, self.id_rankings)) # create a new round
+
+    return self.rounds[-1]
 
   def get_fencer_by_id(self, fencer_id):
     ''' Returns the fencer object associated with the given fencer_id '''
     # Linear search
     for fencer in self.fencers:
       if fencer.fencer_id == fencer_id: return fencer
+
+class League:
+  '''
+  League: a group of multiple Events. Also, League has an attribute "current", a dictionary which stores the current event, round, and poule, and the (1-indexed) index of the current round and poule for outputting purposes (the current system is 1-indexed, so its more understandable for users)
+  
+  There will only be one instance of the League class at one time within the mainline (main.py), "league". This instance of the league object is regularly serialised to "league.pickle" in order to enable persistence. Then, when the program is terminated and run once more, the "league" object will be de-serialised from "league.pickle".
+
+  Attributes:
+    + events:Event[]
+    + current:dict
+    
+  Methods:
+    + new_event(metadata):Event
+  '''
+    
+  def __init__(self):
+    self.events = []
+    self.current = {} # TODO: remove?
+
+  def new_event(self, event_data, rankings_file):
+    # TODO: new_event or add_event?
+    '''
+    Appends a new event to self.events (and set current["event"] to this new event). If this is the first event to be added, will initialise current.
+    
+    Inputs: event_data (dict with keys ("school_years" or "age_bracket"), "weapon", and "type" (individual or group)), rankings_file (file containing names of fencers ordered by initial rankings)
+    
+    Output: round object that was just created
+    '''
+    self.events.append(Event(event_data, rankings_file))
+    self.current = {"event": self.events[-1]} # update the current event
+    # TODO: decide how to update self.current when a new round etc is added. Do I just have to do this from outside the function?
