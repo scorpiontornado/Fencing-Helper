@@ -1,4 +1,6 @@
-# For the moment, all setup and input happens here. I might modularise/abstract this later.
+# TODO: run tests based on dummy data from testing_data.txt
+# put in appendix w/ test data
+
 import scoresheet # custom classes made by candidate
 import re # regex
 import pickle # serialisation and de-serialisation

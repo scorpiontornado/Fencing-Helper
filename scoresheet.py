@@ -230,6 +230,8 @@ class Round:
 
   def generate_rankings(self):
     '''
+    Sorting priority: v/m, ind, hg
+    
     Creates two properties using self.unranked_results (from self.process_data()):
       self.ranked_results: processed, ranked results (sorted dictionary of dictionaries). For displaying round results
       self.new_id_ranks: sorted list of fencer_ids. For creating the next round's poules.
