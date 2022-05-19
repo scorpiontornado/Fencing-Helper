@@ -1,2 +1,0 @@
-hover over bottom left of autoformat: text box behind editor
-name autocompletes to NameError, idk how to make it so that autocomplete is optional

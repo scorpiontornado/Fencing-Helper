@@ -73,7 +73,7 @@ class Round:
   Essentially one "week" of an event, consisting of poules (groups of fencers). Assigns fencer (ids) to poules based on rankings, analyses the raw data from a poule
   
   Attributes:
-    + metadata:dict
+    + round_metadata:dict
     + prev_id_ranks:String[]
     + num_poules:int
     + poules:Poule[]
@@ -92,11 +92,11 @@ class Round:
   # possibly TODO: make consistent. Rankings or results?
   '''
   # TODO: Should fencers be here or in year? Should be easy enough to change, just pass in fencers to input. But, do I want changes to fencers here to affect fencers globally?
-  def __init__(self, parent, metadata, prev_id_ranks):
-    ''' Input: metadata (dict with key "date"), rankings (list of fencers, sorted in desc. order (i.e. best to worst), from the previous round) '''
+  def __init__(self, parent, round_metadata, prev_id_ranks):
+    ''' Input: round_metadata (dict with key "date"), rankings (list of fencers, sorted in desc. order (i.e. best to worst), from the previous round) '''
     self.parent = parent # Parent (Event) object
     
-    self.metadata = metadata # TODO: should the date key be a string YYYYMMDD, DDMMYYYY, or a datetime object?
+    self.round_metadata = round_metadata # TODO: should the date key be a string YYYYMMDD, DDMMYYYY, or a datetime object?
     self.prev_id_ranks = prev_id_ranks
 
   def allocate_poules(self, num_poules=None):
@@ -300,14 +300,14 @@ class Event:
     
   Methods:
     + generate_id()
-    + new_round(metadata, id_rankings=[]):Round
+    + new_round(round_metadata, id_rankings=[]):Round
     + get_fencer_by_id(fencer_id):Fencer
   '''
     
   def __init__(self, event_data, rankings_file):
     self.event_data = event_data # including keys ("school_years" or "age_bracket"), "weapon", and "type" (individual or group)
 
-    ### Read in the rankings of just the fencers' names (not their IDs) inputted by a coach into a file
+    ## Read in the rankings of just the fencers' names (not their IDs) inputted by a coach into a file
     self.fencers = []
     self.highest_id = 0 # Keeps track of the highest integer currently in use in a fencer id. First fencer will have an id of "ID001" # TODO: decide whether to pad with 0s or not # sure, makes it easier to read
     with open(rankings_file) as f:
@@ -316,7 +316,7 @@ class Event:
 
         self.fencers.append(Fencer(name.strip(), self.generate_id())) # Append the current name to name_rankings, stripped of newline characters
       
-    ### Initialise self.id_rankings (as self.fencers is already ordered by rank initially)
+    ## Initialise self.id_rankings (as self.fencers is already ordered by rank initially)
     self.id_rankings = [fencer.fencer_id for fencer in self.fencers]
     self.rounds = []
 
@@ -328,18 +328,18 @@ class Event:
   
     return "ID" + "0"*padding + str(self.highest_id)
 
-  def new_round(self, metadata, id_rankings=[]):
+  def new_round(self, round_metadata, id_rankings=[]):
     '''
     Appends a new round to self.rounds
     
-    Inputs: metadata (dict with key "date"), [id_rankings]
+    Inputs: round_metadata (dict with key "date"), [id_rankings]
     id_rankings overrides the existing rankings from the previous round, e.g. if a fencer is sick for that round
     
     Output: round object that was just created
     '''
     if id_rankings: self.id_rankings = id_rankings # override the current id rankings stored in the event if passed in a new set of id rankings
     print("self.id_rankings:", self.id_rankings)
-    self.rounds.append(Round(self, metadata, self.id_rankings)) # create a new round
+    self.rounds.append(Round(self, round_metadata, self.id_rankings)) # create a new round
 
     return self.rounds[-1]
 
@@ -360,22 +360,32 @@ class League:
     + current:dict
     
   Methods:
-    + new_event(metadata):Event
+    + new_event(event_metadata):Event
+    + display_current(round_num=True, poule_num=True)
   '''
     
   def __init__(self):
     self.events = []
     self.current = {} # TODO: remove?
 
-  def new_event(self, event_data, rankings_file):
+  def new_event(self, event_metadata, rankings_file):
     # TODO: new_event or add_event?
     '''
-    Appends a new event to self.events (and set current["event"] to this new event). If this is the first event to be added, will initialise current.
+    Appends a new event to self.events (and set current["event"] to this new event).
     
-    Inputs: event_data (dict with keys ("school_years" or "age_bracket"), "weapon", and "type" (individual or group)), rankings_file (file containing names of fencers ordered by initial rankings)
+    Inputs: event_metadata (dict with keys ("school_years" or "age_bracket"), "weapon", and "type" (individual or group)), rankings_file (file containing names of fencers ordered by initial rankings)
     
     Output: round object that was just created
     '''
-    self.events.append(Event(event_data, rankings_file))
+    self.events.append(Event(event_metadata, rankings_file))
     self.current = {"event": self.events[-1]} # update the current event
     # TODO: decide how to update self.current when a new round etc is added. Do I just have to do this from outside the function?
+
+  def display_current(self, round_num=True, poule_num=True):
+    """
+    Displays the current round and poule numbers.
+    """
+    if round_num == True:
+      print(f"\n\n ##### CURRENT ROUND: {self.current['round_num']} #####")
+    if poule_num == True:
+      print(f"\n ===== Current Poule: {self.current['poule_num']} =====")
