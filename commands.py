@@ -7,7 +7,7 @@ def help(arguments):
   if not arguments:  
     print("""Here is a list of commands you can do:
     help
-    swap
+    switch
     score
     process
     create
@@ -17,7 +17,7 @@ def help(arguments):
   else:
     print("Command not recognised. Sorry!")
 
-def swap(arguments, current):
+def switch(arguments, current):
   if len(arguments) != 2:
     print("Invalid number of arguments")
     
@@ -38,6 +38,7 @@ def swap(arguments, current):
 
     print(f"\n ######### ROUND {current['round_num']} #########")
     current["round"].display_poules()
+    current["poule"].display_raw_data() # display the raw data (scores)
     
   else:
     print("Invalid argument(s)")
@@ -62,23 +63,24 @@ def score(arguments, current):
     print("Invalid number of arugments.")
 
 def process(arguments, current):
+  # Do I need arguments? Helps with a consistent interface
   current["round"].process_data()
   current["round"].generate_rankings()
-  current["round"].display_results()
-  # print(current["round"].unranked_results) # for testing
+  current["round"].display_results() # Testing
 
 def create(arguments, current):
+  # Todo: create new event?
   if len(arguments) != 1:
     print("Invalid number of arguments")
-  
+  # error
   elif arguments and arguments[0] == "round":
     # PROCESS DATA (if not already done)
     if not hasattr(current["round"], "ranked_results"):
-      current["round"].process_data()
-      current["round"].generate_rankings()
+      process(arguments, current)
+    
     id_rankings = list(current["round"].ranked_results.keys()) # Get sorted list of fencer ids
     #print(id_rankings)
-    print(f"\n ######### RESULTS FOR CURRENT ROUND #########")
+    print(f"\n ######### RESULTS FOR PREVIOUS ROUND #########")
     current["round"].display_results()
 
     date = "" if len(arguments) == 1 else arguments[1] # TODO: auto-set date
@@ -87,13 +89,13 @@ def create(arguments, current):
     current["round_num"] = len(current["event"].rounds)
     
     current["round"].allocate_poules()
-    print(f"\n ######### ROUND {current['round_num']} #########")
+    print(f"\n ######### ROUND {current['round_num']} #########") # TODO: There must be a way to put this into display_poules
     current["round"].display_poules()
     
-    current["poule_num"] = 1
     current["poule"] = current["round"].poules[0]
-  
+    current["poule_num"] = 1
+    
   else:
-    print("Invalid argument")
+    print("Invalid argument(s)")
 
     # return current # unecessary (will modify original copy, as it is pass-by-reference)
