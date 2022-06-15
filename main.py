@@ -2,7 +2,7 @@
 # put in appendix w/ test data
 
 import pickle # serialisation and de-serialisation
-from commands import help, switch, score, process, create
+from commands import help, switch, score, display, create
 from setup import create_league, display_initial_data
 
 ###
@@ -40,12 +40,11 @@ while user_input:
   elif command in ("score", "scores"):
     score(arguments, league.current)
 
-  # This command is now obsolete
-  elif command in ("process", "rankings", "results"):
-    process(arguments, league.current)
+  elif command in ("display"):
+    display(arguments, league.current)
 
   elif command in ("create", "new"):
-    league.current = create(arguments, league.current)
+    league.current = create(arguments, league.current) # league.current = is unnecessary?
   
   else:
     print("Command not recognised. Sorry!")

@@ -6,7 +6,7 @@ def create_league():
   ### INITIALISE DUMMY LEAGUE & EVENT ###
   league = League() # the highest-level data structure.
   event_metadata = {"start_date": "2022-05-19", "end_date": "2022-06-19", "year_groups": "10-12", "weapon": "epee", "type": "individual"} # user-inputted. Currently dummy data
-  league.new_event(event_metadata, "name_rankings.txt")
+  league.new_event(event_metadata, "input_files/name_rankings.txt")
   
   # LEAGUE.CURRENT is a dictionary that stores references to the current event, round, and poule,
   # as well as the (1-indexed) integer indexes corresponding to the current round and poule for outputting purpose

@@ -250,8 +250,13 @@ class Round:
 
   def display_results(self):
     ''' Displays the dictionary of ranked results. Mainly for testing. '''
-    print("\nResults for current round:")
     self.dict_print(self.ranked_results)
+
+  def display_rankings(self):
+    ''' Display fencer rankings (only ranking postition, name, and fencer ID, not metrics) '''
+    for i, fencer_id in enumerate(self.ranked_results):
+      fencer = self.parent.get_fencer_by_id(fencer_id)
+      print(f"  {i+1}.\t{fencer}")
     
 class Fencer:
   '''

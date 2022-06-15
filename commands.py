@@ -9,10 +9,10 @@ def help(arguments):
     help
     switch
     score
-    process
+    display
     create
   Type "help [command]" to learn more about each command!""")
-  elif arguments[0] == "score":
+  elif arguments[0].lower() == "score":
     print('Usage: "score [fencer_id1], [score1], [fencer_id2], [score2]"')
   else:
     print("Command not recognised. Sorry!")
@@ -21,7 +21,7 @@ def switch(arguments, current):
   if len(arguments) != 2:
     print("Invalid number of arguments")
     
-  elif arguments[0] in ("poule", "poules") and int(arguments[1]) >= 1 and int(arguments[1]) <= len(current["round"].poules):
+  elif arguments[0].lower() in ("poule", "poules") and int(arguments[1]) >= 1 and int(arguments[1]) <= len(current["round"].poules):
     current["poule_num"] = int(arguments[1])
     current["poule"] = current["round"].poules[current["poule_num"]-1]
 
@@ -29,7 +29,7 @@ def switch(arguments, current):
     current["round"].display_poules(current["poule_num"])  
     current["poule"].display_raw_data() # display the raw data (scores)
     
-  elif arguments[0] in ("round", "rounds") and int(arguments[1]) >= 1 and int(arguments[1]) <= len(current["event"].rounds):
+  elif arguments[0].lower() in ("round", "rounds") and int(arguments[1]) >= 1 and int(arguments[1]) <= len(current["event"].rounds):
     current["round_num"] = int(arguments[1])
     current["round"] = current["event"].rounds[current["round_num"]-1]
 
@@ -62,21 +62,36 @@ def score(arguments, current):
   else:
     print("Invalid number of arugments.")
 
-def process(arguments, current):
-  # Do I need arguments? Helps with a consistent interface
+def process(current):
+  """ Helper function - processes the raw data for the current round and generates rankings. """
   current["round"].process_data()
   current["round"].generate_rankings()
-  current["round"].display_results() # Testing
+  current["round"].display_results() # TODO: Testing
+
+def display(arguments, current):
+  """ Display the current fencer rankings. Useful for manual direct elimination (DE) tableau formulation. """
+  if len(arguments) != 1:
+    print("Invalid number of arguments")
+  # error
+  elif arguments and arguments[0].lower() in ("rankings", "ranking", "ranks", "rank"):
+    # TODO: add support for displaying the rankings of a particular round
+    # PROCESS DATA (will override previous rankings)
+    print("\nRanked results:")
+    process(current)
+    
+    print("\nCurrent rankings:")
+    current["round"].display_rankings()
+  # TODO: Display poules
 
 def create(arguments, current):
   # Todo: create new event?
   if len(arguments) != 1:
     print("Invalid number of arguments")
   # error
-  elif arguments and arguments[0] == "round":
-    # PROCESS DATA (if not already done)
-    if not hasattr(current["round"], "ranked_results"):
-      process(arguments, current)
+  elif arguments and arguments[0].lower() == "round":
+    # PROCESS DATA (will override previous rankings)
+    print("\nRanked results:")
+    process(current)
     
     id_rankings = list(current["round"].ranked_results.keys()) # Get sorted list of fencer ids
     #print(id_rankings)
