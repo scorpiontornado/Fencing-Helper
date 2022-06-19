@@ -165,7 +165,7 @@ class Round:
         for fencer_id in cur_poule.fencer_ids:
           fencer = self.parent.get_fencer_by_id(fencer_id)
           print(fencer) # TODO: put index next to fencer?
-    elif isinstance(poule_num, int) and poule_num >= 0 and poule_num < self.num_poules:
+    elif isinstance(poule_num, int) and poule_num >= 1 and poule_num <= self.num_poules:
       print(f"\n ========= Poule {poule_num} =========")
       for fencer_id in self.poules[poule_num-1].fencer_ids: # -1 because users will expect it to be 1-indexed rather than 0-indexed
         fencer = self.parent.get_fencer_by_id(fencer_id)
@@ -190,7 +190,7 @@ class Round:
     self.unranked_results = {}
     for poule in self.poules:
       # Loop through all fencers in the current poule
-      for i, row in enumerate(poule.raw_data):
+      for i in range(len(poule.raw_data)):
         # Note: fencer_ids[index] returns the fencer_id for the given index
         cur_fencer_id = poule.fencer_ids[i]
         self.unranked_results[cur_fencer_id] = {
@@ -201,7 +201,8 @@ class Round:
         } # initialise dictionary for current fencer_id (note that v/m and ind are set later)
         
         # Loop over all opponents for the current fencer
-        for j, value in enumerate(row):
+        for j in range(len(poule.raw_data[i])):
+          # Skip current value if not an integer, e.g. "_" or "X"
           if (i == j
               or not isinstance(poule.raw_data[i][j], int)
               or not isinstance(poule.raw_data[j][i], int)):

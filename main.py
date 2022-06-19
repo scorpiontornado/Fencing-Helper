@@ -38,13 +38,13 @@ while user_input:
     switch(arguments, league.current) # modifies the LEAGUE.CURRENT dictionary, switching the current round or poule
   
   elif command in ("score", "scores"):
-    score(arguments, league.current)
+    score(arguments, league.current) # input raw data (the final score of a single bout) to current poule
 
-  elif command in ("display"):
-    display(arguments, league.current)
+  elif command == "display":
+    display(arguments, league.current) # generate and display fencer rankings for current round
 
   elif command in ("create", "new"):
-    league.current = create(arguments, league.current) # league.current = is unnecessary?
+    create(arguments, league.current) # create a new round or event object and update LEAGUE.CURRENT
   
   else:
     print("Command not recognised. Sorry!")

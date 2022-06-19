@@ -1,5 +1,27 @@
 from scoresheet import League # custom class made by candidate
 
+def load_bout_results(file_path, current):
+  """
+  Load raw data (bout results) for the first round from text file.
+  File format:
+    - Poules separated by an empty line ("\n\n")
+    - Within each poule, grid-shaped format with values separated by commas, rows separated by newlines
+  """
+
+  with open(file_path) as f:
+    raw_data = f.read()
+  poules = raw_data.split("\n\n")
+
+  # Loop over each poule
+  for i, poule in enumerate(poules):
+    temp = []
+    
+    # Loop over each row
+    for row in poule.split():
+      temp.append(row.split(",")) # Append all values in row to temp
+
+    current["round"].poules[i].raw_data = temp    
+
 def create_league():
   # TODO: create an input system (maybe from a file?) to automatically add events like "2022 Jan-Mar U14 epee individual event". Or, add a setup process with user input, e.g. "Welcome to Fencing Helper. Let's set up a new event." "When is "
   
@@ -22,16 +44,9 @@ def create_league():
   # Set the first poule to be the current poule in CURRENT
   league.current["poule"] = league.current["round"].poules[0]
   league.current["poule_num"] = 1
-  
-  # Insert dummy data. TODO: make it possible to do this via a file.
-  league.current["poule"].raw_data = [
-    ["X", 5, 4, 5, 2, 5],
-    [1, "X", 3, 5, 2, 3],
-    [5, 5, "X", 4, 3, 5],
-    [2, 4, 5, "X", 3, 4],
-    [5, 5, 5, 5, "X", 5],
-    [4, 5, 4, 5, 3, "X"],
-  ] # debugging
+
+  # For testing functionality of program with predetermined raw data
+  load_bout_results("input_files/raw_data.txt", league.current)
 
   return league
 

@@ -20,7 +20,7 @@ def help(arguments):
 def switch(arguments, current):
   if len(arguments) != 2:
     print("Invalid number of arguments")
-    
+
   elif arguments[0].lower() in ("poule", "poules") and int(arguments[1]) >= 1 and int(arguments[1]) <= len(current["round"].poules):
     current["poule_num"] = int(arguments[1])
     current["poule"] = current["round"].poules[current["poule_num"]-1]
