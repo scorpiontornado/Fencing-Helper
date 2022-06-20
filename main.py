@@ -1,6 +1,3 @@
-# TODO: run tests based on dummy data from testing_data.txt
-# put in appendix w/ test data
-
 import pickle # serialisation and de-serialisation
 from commands import help, switch, score, display, create
 from setup import create_league, display_initial_data
@@ -10,14 +7,10 @@ from setup import create_league, display_initial_data
 # Attempt to de-serialse & load years from "years.pickle"
 try:
   with open("league.pickle", "rb") as file:
-    # TODO: write description of years, similar to the one I did for the (now deprecated) years
     league = pickle.load(file) # de-serialise & load data contained in file "league.pickle" and assign to league
-    # print("Successfully loaded league.pickle\n")
     
 except (FileNotFoundError, EOFError):
-  print("league.pickle not found, creating a new league")
   league = create_league()
-  print("Successfully created new league\n")
 
 ###
 

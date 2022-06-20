@@ -1,4 +1,7 @@
 # Readme
+
+To use this program, run "python3 main.py" on a shell with Python installed.
+
 ## About
 This is a program made as part of my IB Computer Science IA, in which students are required to code a solution to a real-world problem.
 

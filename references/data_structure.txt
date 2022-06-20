@@ -1,8 +1,8 @@
 # Data structures
 ## Scoresheet
 
-years = {
-  "2019": events = [
+league = League object
+  events = [
     Event object
       event_data = { # Will be used to construct a string like "U14 epee individual event"
         start_date: "20220517"
@@ -32,8 +32,13 @@ years = {
           ]
       ]
   ]
-  "2020": events
-  "2021": events
+  current {
+    "event": reference to Event object
+    "round": reference to Round object
+    "round_num": integer
+    "poule": reference to Poule object
+    "poule_num": integer
+  }
 }
 
 
