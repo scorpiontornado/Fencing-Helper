@@ -186,6 +186,7 @@ class Round:
     Creates one property:
       self.unranked_results: processed, unranked results (i.e. dictionary of dictionaries containing v, m ... for each fencer_id)
     '''
+    
     # Loop through all poules
     self.unranked_results = {}
     for poule in self.poules:

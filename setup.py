@@ -14,13 +14,21 @@ def load_bout_results(file_path, current):
 
   # Loop over each poule
   for i, poule in enumerate(poules):
-    temp = []
+    temp_data = []
     
     # Loop over each row
     for row in poule.split():
-      temp.append(row.split(",")) # Append all values in row to temp
+      formatted_row = []
+      
+      for value in row.split(","):
+        try:
+          formatted_row.append(int(value)) # Change type to integer if possible
+        except ValueError:
+          formatted_row.append(value)
+      
+      temp_data.append(formatted_row) # Append current row to temp
 
-    current["round"].poules[i].raw_data = temp    
+    current["round"].poules[i].raw_data = temp_data
 
 def create_league():
   # TODO: create an input system (maybe from a file?) to automatically add events like "2022 Jan-Mar U14 epee individual event". Or, add a setup process with user input, e.g. "Welcome to Fencing Helper. Let's set up a new event." "When is "

@@ -64,6 +64,7 @@ def score(arguments, current):
 
 def process(current):
   """ Helper function - processes the raw data for the current round and generates rankings. """
+  
   current["round"].process_data()
   current["round"].generate_rankings()
   current["round"].display_results() # TODO: Testing
